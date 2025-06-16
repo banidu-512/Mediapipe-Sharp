@@ -1,11 +1,5 @@
-﻿namespace Mediapipe.Test;
+﻿using Mediapipe.Test;
 
-internal class Program
-{
-    static void Main(string[] args)
-    {
-        var temp = new FaceLandmarkerTest();
-        temp.Init();
-        temp.PutImage("lenna.png");
-    }
-}
+var detector = new HandDetectorTest();
+detector.Init();
+Console.ReadLine();

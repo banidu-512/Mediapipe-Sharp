@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Protobuf\Modules\FaceGeometry\" />
-    <Folder Include="Protobuf\Modules\Objectron\" />
+    <PackageReference Include="Google.Protobuf" Version="3.31.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.29.0" />
+    <None Update="Libs\mediapipe_c.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
