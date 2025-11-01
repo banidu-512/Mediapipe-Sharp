@@ -262,7 +262,7 @@ public sealed class FaceLandmarker : Core.BaseVisionTaskApi
             using var image = outImagePacket.Get();
             var timestamp = outImagePacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
 
-            if (TryBuildFaceLandmarkerResult(outputPackets, faceGeometriesForRead, ref faceLandmarkerResult))
+            if (TryBuildFaceLandmarkerResult(outputPackets, faceGeometriesForRead!, ref faceLandmarkerResult))
             {
                 resultCallback(faceLandmarkerResult, image, timestamp);
             }

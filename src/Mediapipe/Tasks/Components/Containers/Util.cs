@@ -12,7 +12,7 @@ internal static class Util
         {
             return "null";
         }
-        var str = string.Join(", ", list.Select(x => x.ToString()));
+        var str = string.Join(", ", list.Select(x => x?.ToString() ?? "null"));
         return $"[{str}]";
     }
 }

@@ -15,7 +15,7 @@ public class TaskRunner : MpResourceHandle
     {
         var bytes = config.ToByteArray();
         var gpuResourcesPtr = gpuResources == null ? IntPtr.Zero : gpuResources.SharedPtr;
-        UnsafeNativeMethods.mp_tasks_core_TaskRunner_Create__PKc_i_PF_Pgr(bytes, bytes.Length, callbackId, packetsCallback, gpuResourcesPtr, out var statusPtr, out var taskRunnerPtr).Assert();
+        UnsafeNativeMethods.mp_tasks_core_TaskRunner_Create__PKc_i_PF_Pgr(bytes, bytes.Length, callbackId, packetsCallback!, gpuResourcesPtr, out var statusPtr, out var taskRunnerPtr).Assert();
 
         AssertStatusOk(statusPtr);
         return new TaskRunner(taskRunnerPtr);
@@ -24,7 +24,7 @@ public class TaskRunner : MpResourceHandle
     public static TaskRunner Create(CalculatorGraphConfig config, int callbackId = -1, NativePacketsCallback? packetsCallback = null)
     {
         var bytes = config.ToByteArray();
-        UnsafeNativeMethods.mp_tasks_core_TaskRunner_Create__PKc_i_PF(bytes, bytes.Length, callbackId, packetsCallback, out var statusPtr, out var taskRunnerPtr).Assert();
+        UnsafeNativeMethods.mp_tasks_core_TaskRunner_Create__PKc_i_PF(bytes, bytes.Length, callbackId, packetsCallback!, out var statusPtr, out var taskRunnerPtr).Assert();
 
         AssertStatusOk(statusPtr);
         return new TaskRunner(taskRunnerPtr);

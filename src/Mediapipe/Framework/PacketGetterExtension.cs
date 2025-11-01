@@ -476,7 +476,7 @@ public static class PacketGetterExtension
         var str = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ptr);
         UnsafeNativeMethods.delete_array__PKc(ptr);
 
-        return str;
+        return str!;
     }
 
     [Obsolete("Use Get instead")]

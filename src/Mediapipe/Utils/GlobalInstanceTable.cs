@@ -4,7 +4,7 @@ namespace Mediapipe.Utils;
 public class GlobalInstanceTable<TKey, TValue> where TValue : class
 {
     private readonly ReaderWriterLockSlim _tableLock = new();
-    private readonly Dictionary<TKey, WeakReference<TValue>> _table;
+    private readonly Dictionary<TKey, WeakReference<TValue>> _table = null!;
 
     private int _maxSize;
     /// <summary>
@@ -90,7 +90,7 @@ public class GlobalInstanceTable<TKey, TValue> where TValue : class
             {
                 return _table[key].TryGetTarget(out value);
             }
-            value = default;
+            value = default!;
             return false;
         }
         finally

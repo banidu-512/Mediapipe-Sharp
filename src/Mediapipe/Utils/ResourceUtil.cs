@@ -84,7 +84,7 @@ public static class ResourceUtil
             }
             throw new KeyNotFoundException($"Failed to find the file path for `{assetPath}`");
         }
-        catch (Exception e)
+        catch
         {
             return "";
         }
@@ -104,7 +104,7 @@ public static class ResourceUtil
             srcStr.Swap(new StdString(dst, false));
             return true;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }
