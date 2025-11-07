@@ -4,15 +4,24 @@ namespace Mediapipe.External;
 
 public static class Glog
 {
-    public enum Severity : int
+    public enum Severity
     {
         INFO = 0,
         WARNING = 1,
         ERROR = 2,
-        FATAL = 3,
+        FATAL = 3
     }
 
-    private static bool _Logtostderr = false;
+    private static bool _Logtostderr;
+
+    private static int _Stderrthreshold = 2;
+
+    private static int _Minloglevel;
+
+    private static string? _LogDir;
+
+    private static int _V;
+
     public static bool Logtostderr
     {
         get => _Logtostderr;
@@ -23,7 +32,6 @@ public static class Glog
         }
     }
 
-    private static int _Stderrthreshold = 2;
     public static int Stderrthreshold
     {
         get => _Stderrthreshold;
@@ -34,7 +42,6 @@ public static class Glog
         }
     }
 
-    private static int _Minloglevel = 0;
     public static int Minloglevel
     {
         get => _Minloglevel;
@@ -45,7 +52,6 @@ public static class Glog
         }
     }
 
-    private static string? _LogDir;
     public static string? LogDir
     {
         get => _LogDir;
@@ -56,7 +62,6 @@ public static class Glog
         }
     }
 
-    private static int _V = 0;
     public static int V
     {
         get => _V;
@@ -82,29 +87,29 @@ public static class Glog
         switch (severity)
         {
             case Severity.INFO:
-                {
-                    UnsafeNativeMethods.glog_LOG_INFO__PKc(str);
-                    break;
-                }
+            {
+                UnsafeNativeMethods.glog_LOG_INFO__PKc(str);
+                break;
+            }
             case Severity.WARNING:
-                {
-                    UnsafeNativeMethods.glog_LOG_WARNING__PKc(str);
-                    break;
-                }
+            {
+                UnsafeNativeMethods.glog_LOG_WARNING__PKc(str);
+                break;
+            }
             case Severity.ERROR:
-                {
-                    UnsafeNativeMethods.glog_LOG_ERROR__PKc(str);
-                    break;
-                }
+            {
+                UnsafeNativeMethods.glog_LOG_ERROR__PKc(str);
+                break;
+            }
             case Severity.FATAL:
-                {
-                    UnsafeNativeMethods.glog_LOG_FATAL__PKc(str);
-                    break;
-                }
+            {
+                UnsafeNativeMethods.glog_LOG_FATAL__PKc(str);
+                break;
+            }
             default:
-                {
-                    throw new ArgumentException($"Unknown Severity: {severity}");
-                }
+            {
+                throw new ArgumentException($"Unknown Severity: {severity}");
+            }
         }
     }
 

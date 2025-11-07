@@ -12,7 +12,7 @@ public class OutputStreamPoller<T>(nint ptr) : MpResourceHandle(ptr)
 
     public bool Next(Packet<T> packet)
     {
-        UnsafeNativeMethods.mp_OutputStreamPoller__Next_Ppacket(MpPtr, packet.MpPtr, out var result).Assert();
+        UnsafeNativeMethods.mp_OutputStreamPoller__Next_Ppacket(MpPtr, packet.MpPtr, out bool result).Assert();
 
         return result;
     }
@@ -29,7 +29,7 @@ public class OutputStreamPoller<T>(nint ptr) : MpResourceHandle(ptr)
 
     public int QueueSize()
     {
-        UnsafeNativeMethods.mp_OutputStreamPoller__QueueSize(MpPtr, out var result).Assert();
+        UnsafeNativeMethods.mp_OutputStreamPoller__QueueSize(MpPtr, out int result).Assert();
 
         return result;
     }

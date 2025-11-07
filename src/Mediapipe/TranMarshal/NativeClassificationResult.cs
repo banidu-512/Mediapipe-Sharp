@@ -39,7 +39,8 @@ internal readonly struct NativeClassificationResult
         {
             unsafe
             {
-                return new ReadOnlySpan<NativeClassifications>((NativeClassifications*)_classifications, (int)classificationsCount);
+                return new ReadOnlySpan<NativeClassifications>((NativeClassifications*)_classifications,
+                    (int)classificationsCount);
             }
         }
     }

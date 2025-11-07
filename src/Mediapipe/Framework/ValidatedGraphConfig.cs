@@ -1,19 +1,20 @@
 using System.Runtime.InteropServices;
 using Google.Protobuf;
 using Mediapipe.Core;
+using Mediapipe.External;
 using Mediapipe.Framework.Packet;
 using Mediapipe.PInvoke;
 
 namespace Mediapipe.Framework;
 
-public enum NodeType : int
+public enum NodeType
 {
     Unknown = 0,
     Calculator = 1,
     PacketGenerator = 2,
     GraphInputStream = 3,
-    StatusHandler = 4,
-};
+    StatusHandler = 4
+}
 
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct NodeRef
@@ -52,15 +53,15 @@ internal readonly struct EdgeInfoVector
 
     public List<EdgeInfo> Copy()
     {
-        var edgeInfos = new List<EdgeInfo>(_size);
+        List<EdgeInfo> edgeInfos = new(_size);
 
         unsafe
         {
-            var edgeInfoPtr = (EdgeInfoTmp*)_data;
+            EdgeInfoTmp* edgeInfoPtr = (EdgeInfoTmp*)_data;
 
-            for (var i = 0; i < _size; i++)
+            for (int i = 0; i < _size; i++)
             {
-                var edgeInfoTmp = System.Runtime.InteropServices.Marshal.PtrToStructure<EdgeInfoTmp>((nint)edgeInfoPtr++);
+                EdgeInfoTmp edgeInfoTmp = Marshal.PtrToStructure<EdgeInfoTmp>((nint)edgeInfoPtr++);
                 edgeInfos.Add(edgeInfoTmp.Copy());
             }
         }
@@ -75,12 +76,11 @@ internal readonly struct EdgeInfoVector
         private readonly NodeRef _parentNode;
         private readonly nint _name;
 
-        [MarshalAs(UnmanagedType.U1)]
-        private readonly bool _backEdge;
+        [MarshalAs(UnmanagedType.U1)] private readonly bool _backEdge;
 
         public EdgeInfo Copy()
         {
-            var name = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(_name);
+            string? name = Marshal.PtrToStringAnsi(_name);
             return new EdgeInfo(_upstream, _parentNode, name, _backEdge);
         }
     }
@@ -88,9 +88,9 @@ internal readonly struct EdgeInfoVector
 
 public class ValidatedGraphConfig : MpResourceHandle
 {
-    public ValidatedGraphConfig() : base()
+    public ValidatedGraphConfig()
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__(out var ptr).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__(out IntPtr ptr).Assert();
         Ptr = ptr;
     }
 
@@ -101,15 +101,16 @@ public class ValidatedGraphConfig : MpResourceHandle
 
     public void Initialize(CalculatorGraphConfig config)
     {
-        var bytes = config.ToByteArray();
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__Initialize__Rcgc(MpPtr, bytes, bytes.Length, out var statusPtr).Assert();
+        byte[]? bytes = config.ToByteArray();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__Initialize__Rcgc(MpPtr, bytes, bytes.Length, out IntPtr statusPtr)
+            .Assert();
 
         AssertStatusOk(statusPtr);
     }
 
     public void Initialize(string graphType)
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__Initialize__PKc(MpPtr, graphType, out var statusPtr).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__Initialize__PKc(MpPtr, graphType, out IntPtr statusPtr).Assert();
 
         AssertStatusOk(statusPtr);
     }
@@ -121,17 +122,21 @@ public class ValidatedGraphConfig : MpResourceHandle
 
     public void ValidateRequiredSidePackets(PacketMap sidePacket)
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__ValidateRequiredSidePackets__Rsp(MpPtr, sidePacket.MpPtr, out var statusPtr).Assert();
+        UnsafeNativeMethods
+            .mp_ValidatedGraphConfig__ValidateRequiredSidePackets__Rsp(MpPtr, sidePacket.MpPtr, out IntPtr statusPtr)
+            .Assert();
 
         AssertStatusOk(statusPtr);
     }
 
     public CalculatorGraphConfig Config(ExtensionRegistry? extensionRegistry = null)
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__Config(MpPtr, out var serializedProto).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__Config(MpPtr, out SerializedProto serializedProto).Assert();
 
-        var parser = extensionRegistry == null ? CalculatorGraphConfig.Parser : CalculatorGraphConfig.Parser.WithExtensionRegistry(extensionRegistry);
-        var config = serializedProto.Deserialize(parser);
+        MessageParser<CalculatorGraphConfig>? parser = extensionRegistry == null
+            ? CalculatorGraphConfig.Parser
+            : CalculatorGraphConfig.Parser.WithExtensionRegistry(extensionRegistry);
+        CalculatorGraphConfig config = serializedProto.Deserialize(parser);
         serializedProto.Dispose();
 
         return config;
@@ -139,36 +144,40 @@ public class ValidatedGraphConfig : MpResourceHandle
 
     public List<EdgeInfo> InputStreamInfos()
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__InputStreamInfos(MpPtr, out var edgeInfoVector).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__InputStreamInfos(MpPtr, out EdgeInfoVector edgeInfoVector)
+            .Assert();
 
-        var edgeInfos = edgeInfoVector.Copy();
+        List<EdgeInfo> edgeInfos = edgeInfoVector.Copy();
         edgeInfoVector.Dispose();
         return edgeInfos;
     }
 
     public List<EdgeInfo> OutputStreamInfos()
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__OutputStreamInfos(MpPtr, out var edgeInfoVector).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__OutputStreamInfos(MpPtr, out EdgeInfoVector edgeInfoVector)
+            .Assert();
 
-        var edgeInfos = edgeInfoVector.Copy();
+        List<EdgeInfo> edgeInfos = edgeInfoVector.Copy();
         edgeInfoVector.Dispose();
         return edgeInfos;
     }
 
     public List<EdgeInfo> InputSidePacketInfos()
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__InputSidePacketInfos(MpPtr, out var edgeInfoVector).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__InputSidePacketInfos(MpPtr, out EdgeInfoVector edgeInfoVector)
+            .Assert();
 
-        var edgeInfos = edgeInfoVector.Copy();
+        List<EdgeInfo> edgeInfos = edgeInfoVector.Copy();
         edgeInfoVector.Dispose();
         return edgeInfos;
     }
 
     public List<EdgeInfo> OutputSidePacketInfos()
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__OutputSidePacketInfos(MpPtr, out var edgeInfoVector).Assert();
+        UnsafeNativeMethods.mp_ValidatedGraphConfig__OutputSidePacketInfos(MpPtr, out EdgeInfoVector edgeInfoVector)
+            .Assert();
 
-        var edgeInfos = edgeInfoVector.Copy();
+        List<EdgeInfo> edgeInfos = edgeInfoVector.Copy();
         edgeInfoVector.Dispose();
         return edgeInfos;
     }
@@ -190,7 +199,9 @@ public class ValidatedGraphConfig : MpResourceHandle
 
     public string? RegisteredSidePacketTypeName(string name)
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__RegisteredSidePacketTypeName(MpPtr, name, out var statusPtr, out var strPtr).Assert();
+        UnsafeNativeMethods
+            .mp_ValidatedGraphConfig__RegisteredSidePacketTypeName(MpPtr, name, out IntPtr statusPtr, out IntPtr strPtr)
+            .Assert();
 
         AssertStatusOk(statusPtr);
         return MarshalStringFromNative(strPtr);
@@ -198,7 +209,9 @@ public class ValidatedGraphConfig : MpResourceHandle
 
     public string? RegisteredStreamTypeName(string name)
     {
-        UnsafeNativeMethods.mp_ValidatedGraphConfig__RegisteredStreamTypeName(MpPtr, name, out var statusPtr, out var strPtr).Assert();
+        UnsafeNativeMethods
+            .mp_ValidatedGraphConfig__RegisteredStreamTypeName(MpPtr, name, out IntPtr statusPtr, out IntPtr strPtr)
+            .Assert();
 
         AssertStatusOk(statusPtr);
         return MarshalStringFromNative(strPtr);

@@ -6,16 +6,20 @@ namespace Mediapipe.PInvoke;
 internal static partial class UnsafeNativeMethods
 {
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_Packet__GetClassificationResult(IntPtr packet, out NativeClassificationResult value);
+    public static extern MpReturnCode mp_Packet__GetClassificationResult(IntPtr packet,
+        out NativeClassificationResult value);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_Packet__GetClassificationsVector(IntPtr packet, out NativeClassificationResult value);
+    public static extern MpReturnCode mp_Packet__GetClassificationsVector(IntPtr packet,
+        out NativeClassificationResult value);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern void mp_tasks_c_components_containers_CppCloseClassificationResult(NativeClassificationResult data);
+    public static extern void mp_tasks_c_components_containers_CppCloseClassificationResult(
+        NativeClassificationResult data);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_Packet__GetClassificationResultVector(IntPtr packet, out NativeClassificationResultArray value);
+    public static extern MpReturnCode mp_Packet__GetClassificationResultVector(IntPtr packet,
+        out NativeClassificationResultArray value);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void mp_api_ClassificationResultArray__delete(NativeClassificationResultArray data);
@@ -33,7 +37,8 @@ internal static partial class UnsafeNativeMethods
     public static extern void mp_api_LandmarksArray__delete(NativeLandmarksArray data);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_Packet__GetNormalizedLandmarksVector(IntPtr packet, out NativeNormalizedLandmarksArray value);
+    public static extern MpReturnCode mp_Packet__GetNormalizedLandmarksVector(IntPtr packet,
+        out NativeNormalizedLandmarksArray value);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void mp_api_NormalizedLandmarksArray__delete(NativeNormalizedLandmarksArray data);

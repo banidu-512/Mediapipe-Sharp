@@ -5,11 +5,13 @@ namespace Mediapipe.External;
 
 public class StdString : MpResourceHandle
 {
-    public StdString(nint ptr, bool isOwner = true) : base(ptr, isOwner) { }
-
-    public StdString(byte[] bytes) : base()
+    public StdString(nint ptr, bool isOwner = true) : base(ptr, isOwner)
     {
-        UnsafeNativeMethods.std_string__PKc_i(bytes, bytes.Length, out var ptr).Assert();
+    }
+
+    public StdString(byte[] bytes)
+    {
+        UnsafeNativeMethods.std_string__PKc_i(bytes, bytes.Length, out IntPtr ptr).Assert();
         Ptr = ptr;
     }
 

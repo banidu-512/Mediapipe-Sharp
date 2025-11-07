@@ -1,5 +1,5 @@
 ﻿using Mediapipe.Test;
 
-var detector = new HandDetectorTest();
+HandDetectorTest detector = new();
 detector.Init();
 Console.ReadLine();

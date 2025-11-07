@@ -3,24 +3,28 @@ namespace Mediapipe.Utils;
 // TODO: make GlobalInstanceTable internal
 public class GlobalInstanceTable<TKey, TValue> where TValue : class
 {
-    private readonly ReaderWriterLockSlim _tableLock = new();
     private readonly Dictionary<TKey, WeakReference<TValue>> _table = null!;
+    private readonly ReaderWriterLockSlim _tableLock = new();
 
     private int _maxSize;
+
+    public GlobalInstanceTable(int maxSize = 0)
+    {
+        MaxSize = maxSize;
+        _table = new Dictionary<TKey, WeakReference<TValue>>(maxSize);
+    }
+
     /// <summary>
-    ///   The maximum number of instances that can be stored in the table.
-    ///   It can be safely changed to a value less than the current number of instances,
-    ///   but <see cref="Add" /> will fail till the number of instances becomes less than or equal to the new value.
+    ///     The maximum number of instances that can be stored in the table.
+    ///     It can be safely changed to a value less than the current number of instances,
+    ///     but <see cref="Add" /> will fail till the number of instances becomes less than or equal to the new value.
     /// </summary>
     public int MaxSize
     {
         get => _maxSize;
         set
         {
-            if (value < 0)
-            {
-                throw new ArgumentException("maxSize must be greater than or equal to 0");
-            }
+            if (value < 0) throw new ArgumentException("maxSize must be greater than or equal to 0");
             _maxSize = value;
         }
     }
@@ -41,33 +45,19 @@ public class GlobalInstanceTable<TKey, TValue> where TValue : class
         }
     }
 
-    public GlobalInstanceTable(int maxSize = 0)
-    {
-        MaxSize = maxSize;
-        _table = new(maxSize);
-    }
-
     public void Add(TKey key, TValue value)
     {
         _tableLock.EnterWriteLock();
         try
         {
-            if (_table.Count >= MaxSize)
-            {
-                ClearUnusedKeys();
-            }
+            if (_table.Count >= MaxSize) ClearUnusedKeys();
 
-            if (_table.Count >= MaxSize)
-            {
-                throw new InvalidOperationException("The table is full");
-            }
+            if (_table.Count >= MaxSize) throw new InvalidOperationException("The table is full");
 
             if (_table.ContainsKey(key))
             {
-                if (_table[key].TryGetTarget(out var _))
-                {
+                if (_table[key].TryGetTarget(out _))
                     throw new ArgumentException("An instance with the same key already exists");
-                }
                 _table[key].SetTarget(value);
             }
             else
@@ -86,10 +76,7 @@ public class GlobalInstanceTable<TKey, TValue> where TValue : class
         _tableLock.EnterReadLock();
         try
         {
-            if (_table.ContainsKey(key))
-            {
-                return _table[key].TryGetTarget(out value);
-            }
+            if (_table.ContainsKey(key)) return _table[key].TryGetTarget(out value);
             value = default!;
             return false;
         }
@@ -139,15 +126,15 @@ public class GlobalInstanceTable<TKey, TValue> where TValue : class
     }
 
     /// <remarks>
-    ///   Aquire the write lock before calling this method.
+    ///     Aquire the write lock before calling this method.
     /// </remarks>
     private void ClearUnusedKeys()
     {
-        var deadKeys = _table.Where(x => !x.Value.TryGetTarget(out var target)).Select(x => x.Key).ToArray();
+        TKey[] deadKeys = _table.Where(x => !x.Value.TryGetTarget(out TValue? target)).Select(x => x.Key).ToArray();
 
-        foreach (var key in deadKeys)
+        foreach (TKey key in deadKeys)
         {
-            var _ = _table.Remove(key);
+            bool _ = _table.Remove(key);
         }
     }
 }

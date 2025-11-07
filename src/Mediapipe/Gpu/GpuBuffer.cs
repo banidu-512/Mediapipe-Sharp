@@ -5,11 +5,13 @@ namespace Mediapipe.Gpu;
 
 public class GpuBuffer : MpResourceHandle
 {
-    public GpuBuffer(nint ptr, bool isOwner = true) : base(ptr, isOwner) { }
-
-    public GpuBuffer(GlTextureBuffer glTextureBuffer) : base()
+    public GpuBuffer(nint ptr, bool isOwner = true) : base(ptr, isOwner)
     {
-        UnsafeNativeMethods.mp_GpuBuffer__PSgtb(glTextureBuffer.SharedPtr, out var ptr).Assert();
+    }
+
+    public GpuBuffer(GlTextureBuffer glTextureBuffer)
+    {
+        UnsafeNativeMethods.mp_GpuBuffer__PSgtb(glTextureBuffer.SharedPtr, out IntPtr ptr).Assert();
         glTextureBuffer.Dispose(); // respect move semantics
         Ptr = ptr;
     }

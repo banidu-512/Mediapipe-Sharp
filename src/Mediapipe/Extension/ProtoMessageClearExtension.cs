@@ -33,6 +33,7 @@ public static class ProtoMessageClearExtension
             locationData.BoundingBox.ClearWidth();
             locationData.BoundingBox.ClearHeight();
         }
+
         if (locationData.RelativeBoundingBox != null)
         {
             locationData.RelativeBoundingBox.ClearXmin();
@@ -40,12 +41,14 @@ public static class ProtoMessageClearExtension
             locationData.RelativeBoundingBox.ClearWidth();
             locationData.RelativeBoundingBox.ClearHeight();
         }
+
         if (locationData.Mask != null)
         {
             locationData.Mask.ClearWidth();
             locationData.Mask.ClearHeight();
             locationData.Mask.Rasterization.Interval.Clear();
         }
+
         locationData.RelativeKeypoints.Clear();
     }
 

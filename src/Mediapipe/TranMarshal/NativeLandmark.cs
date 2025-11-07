@@ -10,12 +10,10 @@ internal readonly struct NativeLandmark
     public readonly float y;
     public readonly float z;
 
-    [MarshalAs(UnmanagedType.I1)]
-    public readonly bool hasVisibility;
+    [MarshalAs(UnmanagedType.I1)] public readonly bool hasVisibility;
     public readonly float visibility;
 
-    [MarshalAs(UnmanagedType.I1)]
-    public readonly bool hasPresence;
+    [MarshalAs(UnmanagedType.I1)] public readonly bool hasPresence;
     public readonly float presence;
 
     private readonly nint _name;
@@ -30,12 +28,10 @@ internal readonly struct NativeNormalizedLandmark
     public readonly float y;
     public readonly float z;
 
-    [MarshalAs(UnmanagedType.I1)]
-    public readonly bool hasVisibility;
+    [MarshalAs(UnmanagedType.I1)] public readonly bool hasVisibility;
     public readonly float visibility;
 
-    [MarshalAs(UnmanagedType.I1)]
-    public readonly bool hasPresence;
+    [MarshalAs(UnmanagedType.I1)] public readonly bool hasPresence;
     public readonly float presence;
 
     private readonly nint _name;
@@ -68,7 +64,8 @@ internal readonly struct NativeNormalizedLandmarks
     {
         unsafe
         {
-            return new ReadOnlySpan<NativeNormalizedLandmark>((NativeNormalizedLandmark*)_landmarks, (int)landmarksCount);
+            return new ReadOnlySpan<NativeNormalizedLandmark>((NativeNormalizedLandmark*)_landmarks,
+                (int)landmarksCount);
         }
     }
 }

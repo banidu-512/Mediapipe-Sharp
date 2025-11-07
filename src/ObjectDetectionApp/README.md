@@ -1,6 +1,7 @@
 # Object Detection App
 
-A real-time object detection application built with MediaPipe and OpenCV that detects multiple object categories from webcam feed.
+A real-time object detection application built with MediaPipe and OpenCV that detects multiple object categories from
+webcam feed.
 
 ## Features
 
@@ -22,9 +23,9 @@ A real-time object detection application built with MediaPipe and OpenCV that de
 ## Setup
 
 1. **Download the Model File**
-   - Download the EfficientDet Lite0 model from MediaPipe's model zoo
-   - Model file: `efficientdet_lite0.tflite` (approximately 5-10MB)
-   - Place it in the `Models/` directory
+    - Download the EfficientDet Lite0 model from MediaPipe's model zoo
+    - Model file: `efficientdet_lite0.tflite` (approximately 5-10MB)
+    - Place it in the `Models/` directory
 
 2. **Build the Application**
    ```bash
@@ -56,6 +57,7 @@ ObjectDetectionApp/
 ### Where to Get the Model
 
 You can download the EfficientDet Lite0 model from:
+
 - [MediaPipe Model Zoo](https://developers.google.com/mediapipe/solutions/vision/object_detector#models)
 - [TensorFlow Hub](https://tfhub.dev/tensorflow/lite-model/efficientdet/lite0/detection/metadata/1)
 
@@ -74,31 +76,31 @@ The app can detect 80+ COCO object categories, including:
 ## Usage
 
 1. **Launch the Application**
-   - Run `ObjectDetectionApp.exe`
-   - Grant camera permissions when prompted
+    - Run `ObjectDetectionApp.exe`
+    - Grant camera permissions when prompted
 
 2. **Object Detection**
-   - The app will automatically start detecting objects from your webcam feed
-   - Colored bounding boxes appear around detected objects
-   - Each box shows the object category and confidence score
-   - Bottom left shows a summary of all detected objects
+    - The app will automatically start detecting objects from your webcam feed
+    - Colored bounding boxes appear around detected objects
+    - Each box shows the object category and confidence score
+    - Bottom left shows a summary of all detected objects
 
 3. **Demo Mode**
-   - If the model file is missing or invalid, the app runs in demo mode
-   - Demo mode shows the webcam feed without object detection
-   - Follow the setup instructions to enable full functionality
+    - If the model file is missing or invalid, the app runs in demo mode
+    - Demo mode shows the webcam feed without object detection
+    - Follow the setup instructions to enable full functionality
 
 ## Visual Indicators
 
 - **Bounding Box Colors**: Different colors for different object categories
-  - Yellow: Person
-  - Blue: Car
-  - Red: Truck
-  - Cyan: Bicycle
-  - Magenta: Motorcycle
-  - Orange: Bus
-  - Green: Chair
-  - And more...
+    - Yellow: Person
+    - Blue: Car
+    - Red: Truck
+    - Cyan: Bicycle
+    - Magenta: Motorcycle
+    - Orange: Bus
+    - Green: Chair
+    - And more...
 
 - **Labels**: Show object category name and confidence score
 - **Summary**: Bottom left shows total count and breakdown by category
@@ -115,6 +117,7 @@ The app can detect 80+ COCO object categories, including:
 ### Model File Issues
 
 **"Model File Missing" Error**
+
 ```
 Solution:
 1. Download efficientdet_lite0.tflite
@@ -123,6 +126,7 @@ Solution:
 ```
 
 **"Invalid Model File" Error**
+
 ```
 Solution:
 1. Ensure the file is a valid TensorFlow Lite model (not a placeholder)
@@ -133,6 +137,7 @@ Solution:
 ### Webcam Issues
 
 **"Failed to open webcam" Error**
+
 ```
 Solution:
 1. Check if webcam is connected
@@ -144,6 +149,7 @@ Solution:
 ### Performance Issues
 
 **Low Frame Rate**
+
 ```
 Solution:
 1. Close other CPU-intensive applications
@@ -152,6 +158,7 @@ Solution:
 ```
 
 **High Memory Usage**
+
 ```
 Solution:
 1. Restart application periodically for long-running sessions
@@ -202,6 +209,7 @@ Solution:
 ### Build Script
 
 The included `build.bat` script:
+
 - Builds in Release configuration
 - Copies model files to output directory
 - Creates a self-contained executable if configured
@@ -213,6 +221,7 @@ This application is part of the MediaPipe-Sharp project and follows the same lic
 ## Support
 
 For issues and support:
+
 1. Check the troubleshooting section above
 2. Verify model file setup
 3. Test with different webcam configurations
@@ -221,6 +230,7 @@ For issues and support:
 ## Contributing
 
 Contributions are welcome! Please:
+
 1. Follow the existing code style
 2. Add appropriate error handling
 3. Update documentation for new features
@@ -228,4 +238,5 @@ Contributions are welcome! Please:
 
 ---
 
-**Note**: This application requires a valid `efficientdet_lite0.tflite` model file to function properly. Without it, the application will run in demo mode showing only the webcam feed.
+**Note**: This application requires a valid `efficientdet_lite0.tflite` model file to function properly. Without it, the
+application will run in demo mode showing only the webcam feed.

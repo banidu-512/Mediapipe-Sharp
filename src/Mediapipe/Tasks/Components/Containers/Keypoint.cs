@@ -3,24 +3,27 @@ using Mediapipe.TranMarshal;
 namespace Mediapipe.Tasks.Components.Containers;
 
 /// <summary>
-///   A keypoint, defined by the coordinates (x, y), normalized by the image dimensions.
+///     A keypoint, defined by the coordinates (x, y), normalized by the image dimensions.
 /// </summary>
 public readonly struct NormalizedKeypoint
 {
     /// <summary>
-    ///   x in normalized image coordinates.
+    ///     x in normalized image coordinates.
     /// </summary>
     public readonly float X;
+
     /// <summary>
-    ///   y in normalized image coordinates.
+    ///     y in normalized image coordinates.
     /// </summary>
     public readonly float Y;
+
     /// <summary>
-    ///   optional label of the keypoint.
+    ///     optional label of the keypoint.
     /// </summary>
     public readonly string? Label;
+
     /// <summary>
-    ///   optional score of the keypoint.
+    ///     optional score of the keypoint.
     /// </summary>
     public readonly float? Score;
 
@@ -33,12 +36,15 @@ public readonly struct NormalizedKeypoint
     }
 
     internal NormalizedKeypoint(NativeNormalizedKeypoint nativeKeypoint) : this(
-      nativeKeypoint.x,
-      nativeKeypoint.y,
-      nativeKeypoint.Label,
-      nativeKeypoint.hasScore ? nativeKeypoint.score : null)
+        nativeKeypoint.x,
+        nativeKeypoint.y,
+        nativeKeypoint.Label,
+        nativeKeypoint.hasScore ? nativeKeypoint.score : null)
     {
     }
 
-    public override string ToString() => $"{{ \"x\": {X}, \"y\": {Y}, \"label\": \"{Label}\", \"score\": {Util.Format(Score)} }}";
+    public override string ToString()
+    {
+        return $"{{ \"x\": {X}, \"y\": {Y}, \"label\": \"{Label}\", \"score\": {Util.Format(Score)} }}";
+    }
 }

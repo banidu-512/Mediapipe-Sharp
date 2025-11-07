@@ -2,7 +2,8 @@ using Mediapipe.Framework.Tool;
 
 namespace Mediapipe.Tasks.Core;
 
-internal class TaskInfo<T>(string taskGraph, List<string> inputStreams, List<string> outputStreams, T taskOptions) where T : ITaskOptions
+internal class TaskInfo<T>(string taskGraph, List<string> inputStreams, List<string> outputStreams, T taskOptions)
+    where T : ITaskOptions
 {
     public string TaskGraph { get; } = taskGraph;
     public List<string> InputStreams { get; } = inputStreams;
@@ -12,83 +13,77 @@ internal class TaskInfo<T>(string taskGraph, List<string> inputStreams, List<str
     public CalculatorGraphConfig GenerateGraphConfig(bool enableFlowLimiting = false)
     {
         if (string.IsNullOrEmpty(TaskGraph) || TaskOptions == null)
-        {
             throw new InvalidOperationException("Please provide both `task_graph` and `task_options`.");
-        }
         if (InputStreams?.Count <= 0 || OutputStreams?.Count <= 0)
-        {
             throw new InvalidOperationException("Both `input_streams` and `output_streams` must be non-empty.");
-        }
 
         if (!enableFlowLimiting)
-        {
-            return new CalculatorGraphConfig()
+            return new CalculatorGraphConfig
             {
-                Node = 
+                Node =
                 {
-                    new CalculatorGraphConfig.Types.Node()
+                    new CalculatorGraphConfig.Types.Node
                     {
                         Calculator = TaskGraph,
                         Options = TaskOptions.ToCalculatorOptions(),
                         InputStream = { InputStreams },
-                        OutputStream = { OutputStreams },
-                    },
+                        OutputStream = { OutputStreams }
+                    }
                 },
                 InputStream = { InputStreams },
-                OutputStream = { OutputStreams },
+                OutputStream = { OutputStreams }
             };
-        }
 
-        var throttledInputStreams = InputStreams!.Select(AddStreamNamePrefix);
-        var finishedStream = $"FINISHED:{Tool.ParseNameFromStream(OutputStreams!.First())}";
-        var flowLimiterOptions = new CalculatorOptions();
-        flowLimiterOptions.SetExtension(FlowLimiterCalculatorOptions.Extensions.Ext, new FlowLimiterCalculatorOptions()
+        IEnumerable<string> throttledInputStreams = InputStreams!.Select(AddStreamNamePrefix);
+        string finishedStream = $"FINISHED:{Tool.ParseNameFromStream(OutputStreams!.First())}";
+        CalculatorOptions flowLimiterOptions = new();
+        flowLimiterOptions.SetExtension(FlowLimiterCalculatorOptions.Extensions.Ext, new FlowLimiterCalculatorOptions
         {
             MaxInFlight = 1,
-            MaxInQueue = 1,
+            MaxInQueue = 1
         });
 
-        return new CalculatorGraphConfig()
+        return new CalculatorGraphConfig
         {
-            Node = 
+            Node =
             {
-                new CalculatorGraphConfig.Types.Node()
+                new CalculatorGraphConfig.Types.Node
                 {
                     Calculator = "FlowLimiterCalculator",
-                    InputStreamInfo = 
+                    InputStreamInfo =
                     {
-                        new InputStreamInfo()
+                        new InputStreamInfo
                         {
-                        TagIndex = "FINISHED",
-                        BackEdge = true,
-                        },
+                            TagIndex = "FINISHED",
+                            BackEdge = true
+                        }
                     },
-                    InputStream = 
-                    { 
-                        InputStreams!.Select(Tool.ParseNameFromStream).Append(finishedStream) 
+                    InputStream =
+                    {
+                        InputStreams!.Select(Tool.ParseNameFromStream).Append(finishedStream)
                     },
-                    OutputStream = 
-                    { 
-                        throttledInputStreams.Select(Tool.ParseNameFromStream) 
+                    OutputStream =
+                    {
+                        throttledInputStreams.Select(Tool.ParseNameFromStream)
                     },
-                    Options = flowLimiterOptions,
+                    Options = flowLimiterOptions
                 },
-                new CalculatorGraphConfig.Types.Node()
+                new CalculatorGraphConfig.Types.Node
                 {
                     Calculator = TaskGraph,
                     InputStream = { throttledInputStreams },
                     OutputStream = { OutputStreams },
-                    Options = TaskOptions.ToCalculatorOptions(),
-                },
+                    Options = TaskOptions.ToCalculatorOptions()
+                }
             },
             InputStream = { InputStreams },
-            OutputStream = { OutputStreams },
+            OutputStream = { OutputStreams }
         };
     }
 
     private static string AddStreamNamePrefix(string tagIndexName)
     {
-        Tool.ParseTagAndName(tagIndexName, out var tag, out var name);
+        Tool.ParseTagAndName(tagIndexName, out string tag, out string name);
         return $"{tag}:throttled_{name}";
     }
 }

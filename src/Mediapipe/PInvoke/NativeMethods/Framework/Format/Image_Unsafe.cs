@@ -22,20 +22,25 @@ internal static partial class UnsafeNativeMethods
     public static extern void mp_Image__delete(IntPtr image);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_Image__ConvertToCpu(IntPtr image, [MarshalAs(UnmanagedType.I1)] out bool result);
+    public static extern MpReturnCode mp_Image__ConvertToCpu(IntPtr image,
+        [MarshalAs(UnmanagedType.I1)] out bool result);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_Image__ConvertToGpu(IntPtr image, [MarshalAs(UnmanagedType.I1)] out bool result);
+    public static extern MpReturnCode mp_Image__ConvertToGpu(IntPtr image,
+        [MarshalAs(UnmanagedType.I1)] out bool result);
 
     #region PixelWriteLock
+
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_PixelWriteLock__RI(IntPtr image, out IntPtr pixelWriteLock);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void mp_PixelWriteLock__delete(IntPtr pixelWriteLock);
+
     #endregion
 
     #region Packet
+
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp__MakeImagePacket__PI(IntPtr image, out IntPtr packet);
 
@@ -43,7 +48,8 @@ internal static partial class UnsafeNativeMethods
     public static extern MpReturnCode mp__MakeImagePacket_At__PI_Rt(IntPtr image, IntPtr timestamp, out IntPtr packet);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp__MakeImagePacket_At__PI_ll(IntPtr image, long timestampMicrosec, out IntPtr packet);
+    public static extern MpReturnCode mp__MakeImagePacket_At__PI_ll(IntPtr image, long timestampMicrosec,
+        out IntPtr packet);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_Packet__ConsumeImage(IntPtr packet, out IntPtr status, out IntPtr image);
@@ -59,5 +65,6 @@ internal static partial class UnsafeNativeMethods
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void mp_api_ImageArray__delete(IntPtr array);
+
     #endregion
 }

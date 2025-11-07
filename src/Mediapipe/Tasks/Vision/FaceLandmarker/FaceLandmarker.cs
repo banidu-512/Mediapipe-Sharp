@@ -5,10 +5,12 @@ using Mediapipe.Framework.Formats;
 using Mediapipe.Framework.Packet;
 using Mediapipe.Gpu;
 using Mediapipe.Tasks.Components.Containers;
+using Mediapipe.Tasks.Core;
+using Mediapipe.Tasks.Vision.Core;
 
 namespace Mediapipe.Tasks.Vision.FaceLandmarker;
 
-public sealed class FaceLandmarker : Core.BaseVisionTaskApi
+public sealed class FaceLandmarker : BaseVisionTaskApi
 {
     private const string _IMAGE_IN_STREAM_NAME = "image_in";
     private const string _IMAGE_OUT_STREAM_NAME = "image_out";
@@ -24,133 +26,130 @@ public sealed class FaceLandmarker : Core.BaseVisionTaskApi
     private const string _TASK_GRAPH_NAME = "mediapipe.tasks.vision.face_landmarker.FaceLandmarkerGraph";
 
     private const int _MICRO_SECONDS_PER_MILLISECOND = 1000;
-
-    private readonly NormalizedRect _normalizedRect = new();
     private readonly List<FaceGeometry.Proto.FaceGeometry>? _faceGeometriesForRead;
 
+    private readonly NormalizedRect _normalizedRect = new();
+
     private FaceLandmarker(
-      CalculatorGraphConfig graphConfig,
-      Core.VisionRunningMode runningMode,
-      GpuResources? gpuResources,
-      List<FaceGeometry.Proto.FaceGeometry>? faceGeometriesForRead,
-      Tasks.Core.TaskRunner.PacketsCallback? packetCallback) : base(graphConfig, runningMode, gpuResources, packetCallback)
+        CalculatorGraphConfig graphConfig,
+        VisionRunningMode runningMode,
+        GpuResources? gpuResources,
+        List<FaceGeometry.Proto.FaceGeometry>? faceGeometriesForRead,
+        TaskRunner.PacketsCallback? packetCallback) : base(graphConfig, runningMode, gpuResources, packetCallback)
     {
         _faceGeometriesForRead = faceGeometriesForRead;
     }
 
     /// <summary>
-    ///   Creates an <see cref="FaceLandmarker" /> object from a TensorFlow Lite model and the default <see cref="FaceLandmarkerOptions" />.
-    ///
-    ///   Note that the created <see cref="FaceLandmarker" /> instance is in image mode,
-    ///   for detecting face landmarks on single image inputs.
+    ///     Creates an <see cref="FaceLandmarker" /> object from a TensorFlow Lite model and the default
+    ///     <see cref="FaceLandmarkerOptions" />.
+    ///     Note that the created <see cref="FaceLandmarker" /> instance is in image mode,
+    ///     for detecting face landmarks on single image inputs.
     /// </summary>
     /// <param name="modelPath">Path to the model.</param>
     /// <param name="gpuResources">
-    ///   <see cref="GpuResources"/> to set to the underlying <see cref="CalculatorGraph"/>.
-    ///   To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest"/> must be called with it.
+    ///     <see cref="GpuResources" /> to set to the underlying <see cref="CalculatorGraph" />.
+    ///     To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest" /> must be called with it.
     /// </param>
     /// <returns>
-    ///   <see cref="FaceLandmarker" /> object that's created from the model and the default <see cref="FaceLandmarkerOptions" />.
+    ///     <see cref="FaceLandmarker" /> object that's created from the model and the default
+    ///     <see cref="FaceLandmarkerOptions" />.
     /// </returns>
     public static FaceLandmarker CreateFromModelPath(string modelPath, GpuResources? gpuResources = null)
     {
-        var baseOptions = new Tasks.Core.CoreBaseOptions(modelAssetPath: modelPath);
-        var options = new FaceLandmarkerOptions(baseOptions, runningMode: Core.VisionRunningMode.IMAGE);
+        CoreBaseOptions baseOptions = new(modelAssetPath: modelPath);
+        FaceLandmarkerOptions options = new(baseOptions);
         return CreateFromOptions(options, gpuResources);
     }
 
     /// <summary>
-    ///   Creates the <see cref="FaceLandmarker" /> object from <paramref name="FaceLandmarkerOptions" />.
+    ///     Creates the <see cref="FaceLandmarker" /> object from <paramref name="FaceLandmarkerOptions" />.
     /// </summary>
     /// <param name="options">Options for the face landmarker task.</param>
     /// <param name="gpuResources">
-    ///   <see cref="GpuResources"/> to set to the underlying <see cref="CalculatorGraph"/>.
-    ///   To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest"/> must be called with it.
+    ///     <see cref="GpuResources" /> to set to the underlying <see cref="CalculatorGraph" />.
+    ///     To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest" /> must be called with it.
     /// </param>
     /// <returns>
-    ///   <see cref="FaceLandmarker" /> object that's created from <paramref name="options" />.
+    ///     <see cref="FaceLandmarker" /> object that's created from <paramref name="options" />.
     /// </returns>
     public static FaceLandmarker CreateFromOptions(FaceLandmarkerOptions options, GpuResources? gpuResources = null)
     {
-        var outputStreams = new List<string> 
+        List<string> outputStreams = new()
         {
             string.Join(":", _NORM_LANDMARKS_TAG, _NORM_LANDMARKS_STREAM_NAME),
-            string.Join(":", _IMAGE_TAG, _IMAGE_OUT_STREAM_NAME),
+            string.Join(":", _IMAGE_TAG, _IMAGE_OUT_STREAM_NAME)
         };
         if (options.OutputFaceBlendshapes)
-        {
             outputStreams.Add(string.Join(":", _BLENDSHAPES_TAG, _BLENDSHAPES_STREAM_NAME));
-        }
         if (options.OutputFaceTransformationMatrixes)
-        {
             outputStreams.Add(string.Join(":", _FACE_GEOMETRY_TAG, _FACE_GEOMETRY_STREAM_NAME));
-        }
-        var taskInfo = new Tasks.Core.TaskInfo<FaceLandmarkerOptions>(
-          taskGraph: _TASK_GRAPH_NAME,
-          inputStreams: [
-              string.Join(":", _IMAGE_TAG, _IMAGE_IN_STREAM_NAME),
-              string.Join(":", _NORM_RECT_TAG, _NORM_RECT_STREAM_NAME),
-          ],
-          outputStreams: outputStreams,
-          taskOptions: options);
+        TaskInfo<FaceLandmarkerOptions> taskInfo = new(
+            _TASK_GRAPH_NAME,
+            [
+                string.Join(":", _IMAGE_TAG, _IMAGE_IN_STREAM_NAME),
+                string.Join(":", _NORM_RECT_TAG, _NORM_RECT_STREAM_NAME)
+            ],
+            outputStreams,
+            options);
 
-        var faceGeometriesForRead = options.OutputFaceTransformationMatrixes ? new List<FaceGeometry.Proto.FaceGeometry>(options.NumFaces) : null;
+        List<FaceGeometry.Proto.FaceGeometry>? faceGeometriesForRead = options.OutputFaceTransformationMatrixes
+            ? new List<FaceGeometry.Proto.FaceGeometry>(options.NumFaces)
+            : null;
         return new FaceLandmarker(
-          taskInfo.GenerateGraphConfig(options.RunningMode == Core.VisionRunningMode.LIVE_STREAM),
-          options.RunningMode,
-          gpuResources,
-          faceGeometriesForRead,
-          BuildPacketsCallback(options, faceGeometriesForRead));
+            taskInfo.GenerateGraphConfig(options.RunningMode == VisionRunningMode.LIVE_STREAM),
+            options.RunningMode,
+            gpuResources,
+            faceGeometriesForRead,
+            BuildPacketsCallback(options, faceGeometriesForRead));
     }
 
     /// <summary>
-    ///   Performs face landmarks detection on the provided MediaPipe Image.
-    ///
-    ///   Only use this method when the <see cref="FaceLandmarker" /> is created with the image running mode.
-    ///   The image can be of any size with format RGB or RGBA.
+    ///     Performs face landmarks detection on the provided MediaPipe Image.
+    ///     Only use this method when the <see cref="FaceLandmarker" /> is created with the image running mode.
+    ///     The image can be of any size with format RGB or RGBA.
     /// </summary>
     /// <param name="image">MediaPipe Image.</param>
     /// <param name="imageProcessingOptions">Options for image processing.</param>
     /// <returns>
-    ///   The face landmarks detection results.
+    ///     The face landmarks detection results.
     /// </returns>
-    public FaceLandmarkerResult Detect(Image image, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    public FaceLandmarkerResult Detect(Image image, ImageProcessingOptions? imageProcessingOptions = null)
     {
-        using var outputPackets = DetectInternal(image, imageProcessingOptions);
+        using PacketMap outputPackets = DetectInternal(image, imageProcessingOptions);
 
-        var result = default(FaceLandmarkerResult);
+        FaceLandmarkerResult result = default;
         _ = TryBuildFaceLandmarkerResult(outputPackets, ref result);
         return result;
     }
 
     /// <summary>
-    ///   Performs face landmarks detection on the provided MediaPipe Image.
-    ///
-    ///   Only use this method when the <see cref="FaceLandmarker" /> is created with the image running mode.
-    ///   The image can be of any size with format RGB or RGBA.
+    ///     Performs face landmarks detection on the provided MediaPipe Image.
+    ///     Only use this method when the <see cref="FaceLandmarker" /> is created with the image running mode.
+    ///     The image can be of any size with format RGB or RGBA.
     /// </summary>
     /// <remarks>
-    ///   When faces are not found, <paramref name="result"/> won't be overwritten.
+    ///     When faces are not found, <paramref name="result" /> won't be overwritten.
     /// </remarks>
     /// <param name="image">MediaPipe Image.</param>
     /// <param name="imageProcessingOptions">Options for image processing.</param>
     /// <param name="result">
-    ///   <see cref="FaceLandmarkerResult"/> to which the result will be written.
+    ///     <see cref="FaceLandmarkerResult" /> to which the result will be written.
     /// </param>
     /// <returns>
-    ///   <see langword="true"/> if some faces are detected, <see langword="false"/> otherwise.
+    ///     <see langword="true" /> if some faces are detected, <see langword="false" /> otherwise.
     /// </returns>
-    public bool TryDetect(Image image, Core.ImageProcessingOptions? imageProcessingOptions, ref FaceLandmarkerResult result)
+    public bool TryDetect(Image image, ImageProcessingOptions? imageProcessingOptions, ref FaceLandmarkerResult result)
     {
-        using var outputPackets = DetectInternal(image, imageProcessingOptions);
+        using PacketMap outputPackets = DetectInternal(image, imageProcessingOptions);
         return TryBuildFaceLandmarkerResult(outputPackets, ref result);
     }
 
-    private PacketMap DetectInternal(Image image, Core.ImageProcessingOptions? imageProcessingOptions)
+    private PacketMap DetectInternal(Image image, ImageProcessingOptions? imageProcessingOptions)
     {
-        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, roiAllowed: false);
+        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, false);
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_IMAGE_IN_STREAM_NAME, PacketHelper.CreateImage(image));
         packetMap.Emplace(_NORM_RECT_STREAM_NAME, PacketHelper.CreateProto(_normalizedRect));
 
@@ -158,54 +157,55 @@ public sealed class FaceLandmarker : Core.BaseVisionTaskApi
     }
 
     /// <summary>
-    ///   Performs face landmarks detection on the provided video frames.
-    ///
-    ///   Only use this method when the FaceLandmarker is created with the video
-    ///   running mode. It's required to provide the video frame's timestamp (in
-    ///   milliseconds) along with the video frame. The input timestamps should be
-    ///   monotonically increasing for adjacent calls of this method.
+    ///     Performs face landmarks detection on the provided video frames.
+    ///     Only use this method when the FaceLandmarker is created with the video
+    ///     running mode. It's required to provide the video frame's timestamp (in
+    ///     milliseconds) along with the video frame. The input timestamps should be
+    ///     monotonically increasing for adjacent calls of this method.
     /// </summary>
     /// <returns>
-    ///   The face landmarks detection results.
+    ///     The face landmarks detection results.
     /// </returns>
-    public FaceLandmarkerResult DetectForVideo(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    public FaceLandmarkerResult DetectForVideo(Image image, long timestampMillisec,
+        ImageProcessingOptions? imageProcessingOptions = null)
     {
-        using var outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
+        using PacketMap outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
 
-        var result = default(FaceLandmarkerResult);
+        FaceLandmarkerResult result = default;
         _ = TryBuildFaceLandmarkerResult(outputPackets, ref result);
         return result;
     }
 
     /// <summary>
-    ///   Performs face landmarks detection on the provided video frames.
-    ///
-    ///   Only use this method when the FaceLandmarker is created with the video
-    ///   running mode. It's required to provide the video frame's timestamp (in
-    ///   milliseconds) along with the video frame. The input timestamps should be
-    ///   monotonically increasing for adjacent calls of this method.
+    ///     Performs face landmarks detection on the provided video frames.
+    ///     Only use this method when the FaceLandmarker is created with the video
+    ///     running mode. It's required to provide the video frame's timestamp (in
+    ///     milliseconds) along with the video frame. The input timestamps should be
+    ///     monotonically increasing for adjacent calls of this method.
     /// </summary>
     /// <remarks>
-    ///   When faces are not found, <paramref name="result"/> won't be overwritten.
+    ///     When faces are not found, <paramref name="result" /> won't be overwritten.
     /// </remarks>
     /// <param name="result">
-    ///   <see cref="FaceLandmarkerResult"/> to which the result will be written.
+    ///     <see cref="FaceLandmarkerResult" /> to which the result will be written.
     /// </param>
     /// <returns>
-    ///   <see langword="true"/> if some faces are detected, <see langword="false"/> otherwise.
+    ///     <see langword="true" /> if some faces are detected, <see langword="false" /> otherwise.
     /// </returns>
-    public bool TryDetectForVideo(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions, ref FaceLandmarkerResult result)
+    public bool TryDetectForVideo(Image image, long timestampMillisec, ImageProcessingOptions? imageProcessingOptions,
+        ref FaceLandmarkerResult result)
     {
-        using var outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
+        using PacketMap outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
         return TryBuildFaceLandmarkerResult(outputPackets, ref result);
     }
 
-    private PacketMap DetectForVideoInternal(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    private PacketMap DetectForVideoInternal(Image image, long timestampMillisec,
+        ImageProcessingOptions? imageProcessingOptions = null)
     {
-        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, roiAllowed: false);
-        var timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
+        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, false);
+        long timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_IMAGE_IN_STREAM_NAME, PacketHelper.CreateImageAt(image, timestampMicrosec));
         packetMap.Emplace(_NORM_RECT_STREAM_NAME, PacketHelper.CreateProtoAt(_normalizedRect, timestampMicrosec));
 
@@ -213,24 +213,23 @@ public sealed class FaceLandmarker : Core.BaseVisionTaskApi
     }
 
     /// <summary>
-    ///   Sends live image data to perform face landmarks detection.
-    ///
-    ///   Only use this method when the FaceLandmarker is created with the live stream
-    ///   running mode. The input timestamps should be monotonically increasing for
-    ///   adjacent calls of this method. This method will return immediately after the
-    ///   input image is accepted. The results will be available via the
-    ///   <see cref="FaceLandmarkerOptions.ResultCallbackFunc" /> provided in the <see cref="FaceLandmarkerOptions" />.
-    ///   The <see cref="DetectAsync" /> method is designed to process live stream data such as camera
-    ///   input. To lower the overall latency, face landmarker may drop the input
-    ///   images if needed. In other words, it's not guaranteed to have output per
-    ///   input image.
+    ///     Sends live image data to perform face landmarks detection.
+    ///     Only use this method when the FaceLandmarker is created with the live stream
+    ///     running mode. The input timestamps should be monotonically increasing for
+    ///     adjacent calls of this method. This method will return immediately after the
+    ///     input image is accepted. The results will be available via the
+    ///     <see cref="FaceLandmarkerOptions.ResultCallbackFunc" /> provided in the <see cref="FaceLandmarkerOptions" />.
+    ///     The <see cref="DetectAsync" /> method is designed to process live stream data such as camera
+    ///     input. To lower the overall latency, face landmarker may drop the input
+    ///     images if needed. In other words, it's not guaranteed to have output per
+    ///     input image.
     /// </summary>
-    public void DetectAsync(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    public void DetectAsync(Image image, long timestampMillisec, ImageProcessingOptions? imageProcessingOptions = null)
     {
-        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, roiAllowed: false);
-        var timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
+        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, false);
+        long timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_IMAGE_IN_STREAM_NAME, PacketHelper.CreateImageAt(image, timestampMicrosec));
         packetMap.Emplace(_NORM_RECT_STREAM_NAME, PacketHelper.CreateProtoAt(_normalizedRect, timestampMicrosec));
 
@@ -238,49 +237,40 @@ public sealed class FaceLandmarker : Core.BaseVisionTaskApi
     }
 
     private bool TryBuildFaceLandmarkerResult(PacketMap outputPackets, ref FaceLandmarkerResult result)
-        => TryBuildFaceLandmarkerResult(outputPackets, _faceGeometriesForRead, ref result);
+    {
+        return TryBuildFaceLandmarkerResult(outputPackets, _faceGeometriesForRead, ref result);
+    }
 
-    private static Tasks.Core.TaskRunner.PacketsCallback? BuildPacketsCallback(FaceLandmarkerOptions options,
+    private static TaskRunner.PacketsCallback? BuildPacketsCallback(FaceLandmarkerOptions options,
         List<FaceGeometry.Proto.FaceGeometry>? faceGeometriesForRead)
     {
-        var resultCallback = options.ResultCallback;
-        if (resultCallback == null)
+        FaceLandmarkerOptions.ResultCallbackFunc? resultCallback = options.ResultCallback;
+        if (resultCallback == null) return null;
+
+        FaceLandmarkerResult faceLandmarkerResult = FaceLandmarkerResult.Alloc(options.NumFaces,
+            options.OutputFaceBlendshapes, options.OutputFaceTransformationMatrixes);
+
+        return outputPackets =>
         {
-            return null;
-        }
+            using Packet<Image>? outImagePacket = outputPackets.At<Image>(_IMAGE_OUT_STREAM_NAME);
+            if (outImagePacket == null || outImagePacket.IsEmpty()) return;
 
-        var faceLandmarkerResult = FaceLandmarkerResult.Alloc(options.NumFaces, options.OutputFaceBlendshapes, options.OutputFaceTransformationMatrixes);
-
-        return (PacketMap outputPackets) =>
-        {
-            using var outImagePacket = outputPackets.At<Image>(_IMAGE_OUT_STREAM_NAME);
-            if (outImagePacket == null || outImagePacket.IsEmpty())
-            {
-                return;
-            }
-
-            using var image = outImagePacket.Get();
-            var timestamp = outImagePacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
+            using Image image = outImagePacket.Get();
+            long timestamp = outImagePacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
 
             if (TryBuildFaceLandmarkerResult(outputPackets, faceGeometriesForRead!, ref faceLandmarkerResult))
-            {
                 resultCallback(faceLandmarkerResult, image, timestamp);
-            }
             else
-            {
                 resultCallback(default, image, timestamp);
-            }
         };
     }
 
-    private static void GetFaceGeometryList(Packet<List<FaceGeometry.Proto.FaceGeometry>> packet, List<FaceGeometry.Proto.FaceGeometry> outs)
+    private static void GetFaceGeometryList(Packet<List<FaceGeometry.Proto.FaceGeometry>> packet,
+        List<FaceGeometry.Proto.FaceGeometry> outs)
     {
-        foreach (var geometry in outs)
-        {
-            geometry.Clear();
-        }
+        foreach (FaceGeometry.Proto.FaceGeometry geometry in outs) geometry.Clear();
 
-        var size = packet.WriteTo(FaceGeometry.Proto.FaceGeometry.Parser, outs);
+        int size = packet.WriteTo(FaceGeometry.Proto.FaceGeometry.Parser, outs);
         outs.RemoveRange(size, outs.Count - size);
     }
 
@@ -288,35 +278,33 @@ public sealed class FaceLandmarker : Core.BaseVisionTaskApi
         List<FaceGeometry.Proto.FaceGeometry> faceGeometriesForRead,
         ref FaceLandmarkerResult result)
     {
-        using var faceLandmarksPacket = outputPackets.At<List<NormalizedLandmarks>>(_NORM_LANDMARKS_STREAM_NAME);
-        if (faceLandmarksPacket.IsEmpty())
-        {
-            return false;
-        }
+        using Packet<List<NormalizedLandmarks>> faceLandmarksPacket =
+            outputPackets.At<List<NormalizedLandmarks>>(_NORM_LANDMARKS_STREAM_NAME);
+        if (faceLandmarksPacket.IsEmpty()) return false;
 
-        var faceLandmarks = result.FaceLandmarks ?? [];
+        List<NormalizedLandmarks> faceLandmarks = result.FaceLandmarks ?? [];
         faceLandmarksPacket.Get(faceLandmarks);
 
-        var faceBlendshapesList = result.FaceBlendshapes;
-        using var faceBlendshapesPacket = outputPackets.At<List<Classifications>>(_BLENDSHAPES_STREAM_NAME);
+        List<Classifications>? faceBlendshapesList = result.FaceBlendshapes;
+        using Packet<List<Classifications>>? faceBlendshapesPacket =
+            outputPackets.At<List<Classifications>>(_BLENDSHAPES_STREAM_NAME);
         if (faceBlendshapesPacket != null)
         {
             faceBlendshapesList ??= [];
             faceBlendshapesPacket.Get(faceBlendshapesList);
         }
 
-        var faceTransformationMatrixes = result.FacialTransformationMatrixes;
-        using var faceTransformationMatrixesPacket = outputPackets.At<List<FaceGeometry.Proto.FaceGeometry>>(_FACE_GEOMETRY_STREAM_NAME);
+        List<Matrix4x4>? faceTransformationMatrixes = result.FacialTransformationMatrixes;
+        using Packet<List<FaceGeometry.Proto.FaceGeometry>>? faceTransformationMatrixesPacket =
+            outputPackets.At<List<FaceGeometry.Proto.FaceGeometry>>(_FACE_GEOMETRY_STREAM_NAME);
         if (faceTransformationMatrixesPacket != null)
         {
             GetFaceGeometryList(faceTransformationMatrixesPacket, faceGeometriesForRead);
             faceTransformationMatrixes ??= new List<Matrix4x4>(faceGeometriesForRead.Count);
 
             faceTransformationMatrixes.Clear();
-            foreach (var faceGeometry in faceGeometriesForRead)
-            {
+            foreach (FaceGeometry.Proto.FaceGeometry faceGeometry in faceGeometriesForRead)
                 faceTransformationMatrixes.Add(faceGeometry.PoseTransformMatrix.ToMatrix4x4());
-            }
         }
 
         result = new FaceLandmarkerResult(faceLandmarks, faceBlendshapesList, faceTransformationMatrixes);

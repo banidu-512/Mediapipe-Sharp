@@ -7,11 +7,13 @@ public class GlSyncPoint : MpResourceHandle
 {
     private SharedPtrHandle? _sharedPtrHandle;
 
-    public GlSyncPoint(nint ptr) : base()
+    public GlSyncPoint(nint ptr)
     {
         _sharedPtrHandle = new CSharedPtr(ptr);
         Ptr = _sharedPtrHandle.Get();
     }
+
+    public nint SharedPtr => _sharedPtrHandle == null ? nint.Zero : _sharedPtrHandle.MpPtr;
 
     protected override void DisposeManaged()
     {
@@ -20,6 +22,7 @@ public class GlSyncPoint : MpResourceHandle
             _sharedPtrHandle.Dispose();
             _sharedPtrHandle = null;
         }
+
         base.DisposeManaged();
     }
 
@@ -27,8 +30,6 @@ public class GlSyncPoint : MpResourceHandle
     {
         // Do nothing
     }
-
-    public nint SharedPtr => _sharedPtrHandle == null ? nint.Zero : _sharedPtrHandle.MpPtr;
 
     public void Wait()
     {
@@ -42,14 +43,14 @@ public class GlSyncPoint : MpResourceHandle
 
     public bool IsReady()
     {
-        UnsafeNativeMethods.mp_GlSyncPoint__IsReady(MpPtr, out var value).Assert();
+        UnsafeNativeMethods.mp_GlSyncPoint__IsReady(MpPtr, out bool value).Assert();
 
         return value;
     }
 
     public GlContext GetContext()
     {
-        UnsafeNativeMethods.mp_GlSyncPoint__GetContext(MpPtr, out var sharedGlContextPtr).Assert();
+        UnsafeNativeMethods.mp_GlSyncPoint__GetContext(MpPtr, out IntPtr sharedGlContextPtr).Assert();
 
         return new GlContext(sharedGlContextPtr);
     }
@@ -72,4 +73,3 @@ public class GlSyncPoint : MpResourceHandle
         }
     }
 }
-

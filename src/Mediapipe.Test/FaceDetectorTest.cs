@@ -1,5 +1,7 @@
 ﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Mediapipe.Framework.Formats;
+using Mediapipe.Tasks.Components.Containers;
 using Mediapipe.Tasks.Core;
 using Mediapipe.Tasks.Vision.FaceDetector;
 
@@ -9,19 +11,21 @@ public class FaceDetectorTest
 {
     public void Init()
     {
-        var options = new FaceDetectorOptions(new CoreBaseOptions(CoreBaseOptions.Delegate.CPU, modelAssetPath: "Models/blaze_face_short_range.tflite"));
-        using var faceDetector = FaceDetector.CreateFromOptions(options);
-        using var videoCapture = new VideoCapture();
+        FaceDetectorOptions options =
+            new(new CoreBaseOptions(CoreBaseOptions.Delegate.CPU, "Models/blaze_face_short_range.tflite"));
+        using FaceDetector faceDetector = FaceDetector.CreateFromOptions(options);
+        using VideoCapture videoCapture = new();
         while (videoCapture.IsOpened)
         {
-            using var frame = new Mat();
+            using Mat frame = new();
             videoCapture.Read(frame);
 
-            using var rgb = new Mat();
-            CvInvoke.CvtColor(frame, rgb, Emgu.CV.CvEnum.ColorConversion.Bgr2Rgb);
+            using Mat rgb = new();
+            CvInvoke.CvtColor(frame, rgb, ColorConversion.Bgr2Rgb);
 
-            using var image = new Image(ImageFormat.Types.Format.Srgb, rgb.Width, rgb.Height, rgb.Width * rgb.NumberOfChannels, rgb.GetRawData());
-            var result = faceDetector.Detect(image);
+            using Image image = new(ImageFormat.Types.Format.Srgb, rgb.Width, rgb.Height,
+                rgb.Width * rgb.NumberOfChannels, rgb.GetRawData());
+            DetectionResult result = faceDetector.Detect(image);
             Console.WriteLine(result.Detections?.Count);
         }
     }

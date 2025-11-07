@@ -13,28 +13,36 @@ internal static partial class UnsafeNativeMethods
     public static extern void mp_ValidatedGraphConfig__delete(IntPtr config);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__Initialize__Rcgc(IntPtr config, byte[] serializedConfig, int size, out IntPtr status);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__Initialize__Rcgc(IntPtr config, byte[] serializedConfig,
+        int size, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__Initialize__PKc(IntPtr config, string graphType, out IntPtr status);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__Initialize__PKc(IntPtr config, string graphType,
+        out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__ValidateRequiredSidePackets__Rsp(IntPtr config, IntPtr sidePackets, out IntPtr status);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__ValidateRequiredSidePackets__Rsp(IntPtr config,
+        IntPtr sidePackets, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__Config(IntPtr config, out SerializedProto serializedProto);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__Config(IntPtr config,
+        out SerializedProto serializedProto);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__InputStreamInfos(IntPtr config, out EdgeInfoVector edgeInfoVector);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__InputStreamInfos(IntPtr config,
+        out EdgeInfoVector edgeInfoVector);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__OutputStreamInfos(IntPtr config, out EdgeInfoVector edgeInfoVector);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__OutputStreamInfos(IntPtr config,
+        out EdgeInfoVector edgeInfoVector);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__InputSidePacketInfos(IntPtr config, out EdgeInfoVector edgeInfoVector);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__InputSidePacketInfos(IntPtr config,
+        out EdgeInfoVector edgeInfoVector);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_ValidatedGraphConfig__OutputSidePacketInfos(IntPtr config, out EdgeInfoVector edgeInfoVector);
+    public static extern MpReturnCode mp_ValidatedGraphConfig__OutputSidePacketInfos(IntPtr config,
+        out EdgeInfoVector edgeInfoVector);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_ValidatedGraphConfig__RegisteredSidePacketTypeName(IntPtr config, string name,

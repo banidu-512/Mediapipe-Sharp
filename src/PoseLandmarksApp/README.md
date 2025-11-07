@@ -36,17 +36,20 @@ A real-time pose landmarks detection application using MediaPipe and OpenCV for 
 ## Building and Running
 
 ### Build
+
 ```bash
 cd PoseLandmarksApp
 dotnet build
 ```
 
 ### Run
+
 ```bash
 dotnet run
 ```
 
 Or use the included build script:
+
 ```bash
 build.bat
 ```
@@ -77,24 +80,28 @@ The app detects 33 landmark points per pose:
 - **Red**: Face landmarks
 - **Green**: Torso connections
 - **Blue**: Right arm
-- **Cyan**: Left arm  
+- **Cyan**: Left arm
 - **Magenta**: Right leg
 - **Yellow**: Left leg
 
 ## Troubleshooting
 
 ### Model Not Found
+
 If you see "Demo Mode" message:
+
 1. Download `pose_landmarker.task` from MediaPipe website
 2. Place in `Models/` directory
 3. Restart application
 
 ### No Detection
+
 - Ensure good lighting conditions
 - Position yourself clearly in camera view
 - Check webcam permissions
 
 ### Performance Issues
+
 - Reduce confidence thresholds in MainForm.cs
 - Close other applications using webcam
 - Ensure adequate system resources
@@ -110,6 +117,7 @@ If you see "Demo Mode" message:
 ## Error Handling
 
 The application includes comprehensive error handling:
+
 - **Model validation**: Checks file size and binary format
 - **Graceful degradation**: Runs in demo mode without model
 - **Memory management**: Proper disposal of OpenCV resources
@@ -118,6 +126,7 @@ The application includes comprehensive error handling:
 ## License
 
 This project uses:
+
 - MediaPipe: Apache License 2.0
 - OpenCV: Apache License 2.0
 - OpenCVSharp4: BSD 3-Clause License

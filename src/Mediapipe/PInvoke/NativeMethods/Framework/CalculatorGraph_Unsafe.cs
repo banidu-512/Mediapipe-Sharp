@@ -16,7 +16,8 @@ internal static partial class UnsafeNativeMethods
     public static extern void mp_CalculatorGraph__delete(IntPtr graph);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_CalculatorGraph__Initialize__PKc_i(IntPtr graph, byte[] serializedConfig, int size, out IntPtr status);
+    public static extern MpReturnCode mp_CalculatorGraph__Initialize__PKc_i(IntPtr graph, byte[] serializedConfig,
+        int size, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_CalculatorGraph__Initialize__PKc_i_Rsp(
@@ -26,18 +27,22 @@ internal static partial class UnsafeNativeMethods
     public static extern MpReturnCode mp_CalculatorGraph__Config(IntPtr graph, out SerializedProto serializedProto);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_CalculatorGraph__ObserveOutputStream__PKc_PF_b(IntPtr graph, string streamName, int streamId,
-        [MarshalAs(UnmanagedType.FunctionPtr)] CalculatorGraph.NativePacketCallback packetCallback, [MarshalAs(UnmanagedType.I1)] bool observeTimestampBounds, out IntPtr status);
+    public static extern MpReturnCode mp_CalculatorGraph__ObserveOutputStream__PKc_PF_b(IntPtr graph, string streamName,
+        int streamId,
+        [MarshalAs(UnmanagedType.FunctionPtr)] CalculatorGraph.NativePacketCallback packetCallback,
+        [MarshalAs(UnmanagedType.I1)] bool observeTimestampBounds, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_CalculatorGraph__AddOutputStreamPoller__PKc_b(IntPtr graph, string streamName, [MarshalAs(UnmanagedType.I1)] bool observeTimestampBounds,
+    public static extern MpReturnCode mp_CalculatorGraph__AddOutputStreamPoller__PKc_b(IntPtr graph, string streamName,
+        [MarshalAs(UnmanagedType.I1)] bool observeTimestampBounds,
         out IntPtr status, out IntPtr poller);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_CalculatorGraph__Run__Rsp(IntPtr graph, IntPtr sidePackets, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_CalculatorGraph__StartRun__Rsp(IntPtr graph, IntPtr sidePackets, out IntPtr status);
+    public static extern MpReturnCode mp_CalculatorGraph__StartRun__Rsp(IntPtr graph, IntPtr sidePackets,
+        out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_CalculatorGraph__WaitUntilIdle(IntPtr graph, out IntPtr status);
@@ -54,7 +59,8 @@ internal static partial class UnsafeNativeMethods
         IntPtr graph, string streamName, int maxQueueSize, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_CalculatorGraph__CloseInputStream__PKc(IntPtr graph, string streamName, out IntPtr status);
+    public static extern MpReturnCode mp_CalculatorGraph__CloseInputStream__PKc(IntPtr graph, string streamName,
+        out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_CalculatorGraph__CloseAllPacketSources(IntPtr graph, out IntPtr status);
@@ -63,10 +69,13 @@ internal static partial class UnsafeNativeMethods
     public static extern MpReturnCode mp_CalculatorGraph__Cancel(IntPtr graph);
 
     #region GPU
+
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_CalculatorGraph__GetGpuResources(IntPtr graph, out IntPtr gpuResources);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_CalculatorGraph__SetGpuResources__SPgpu(IntPtr graph, IntPtr gpuResources, out IntPtr status);
+    public static extern MpReturnCode mp_CalculatorGraph__SetGpuResources__SPgpu(IntPtr graph, IntPtr gpuResources,
+        out IntPtr status);
+
     #endregion
 }

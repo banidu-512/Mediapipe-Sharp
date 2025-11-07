@@ -1,13 +1,14 @@
 using Mediapipe.Framework;
 using Mediapipe.Framework.Formats;
 using Mediapipe.Framework.Packet;
+using Mediapipe.Tasks.Audio.Core;
 using Mediapipe.Tasks.Components.Containers;
-
+using Mediapipe.Tasks.Core;
 using AudioClassifierResult = Mediapipe.Tasks.Components.Containers.ClassificationResult;
 
 namespace Mediapipe.Tasks.Audio.AudioClassifier;
 
-public sealed class AudioClassifier : Core.BaseAudioTaskApi
+public sealed class AudioClassifier : BaseAudioTaskApi
 {
     private const string _AUDIO_IN_STREAM_NAME = "audio_in";
     private const string _AUDIO_TAG = "AUDIO";
@@ -24,109 +25,106 @@ public sealed class AudioClassifier : Core.BaseAudioTaskApi
     private double? _defaultSampleRate;
 
     private AudioClassifier(
-      CalculatorGraphConfig graphConfig,
-      Core.RunningMode runningMode,
-      Tasks.Core.TaskRunner.PacketsCallback? packetCallback) : base(graphConfig, runningMode, packetCallback)
+        CalculatorGraphConfig graphConfig,
+        RunningMode runningMode,
+        TaskRunner.PacketsCallback? packetCallback) : base(graphConfig, runningMode, packetCallback)
     {
-
     }
 
     /// <summary>
-    ///   Creates an <see cref="AudioClassifier"/> object from a TensorFlow Lite model and the default <see cref="AudioClassifierOptions"/>.
-    ///
-    ///   Note that the created <see cref="AudioClassifier"/> instance is in audio clips mode, for classifying on independent audio clips.
+    ///     Creates an <see cref="AudioClassifier" /> object from a TensorFlow Lite model and the default
+    ///     <see cref="AudioClassifierOptions" />.
+    ///     Note that the created <see cref="AudioClassifier" /> instance is in audio clips mode, for classifying on
+    ///     independent audio clips.
     /// </summary>
     /// <param name="modelPath">Path to the model.</param>
     /// <returns>
-    ///   <see cref="AudioClassifier" /> object that's created from the model and the default <see cref="AudioClassifierOptions" />.
+    ///     <see cref="AudioClassifier" /> object that's created from the model and the default
+    ///     <see cref="AudioClassifierOptions" />.
     /// </returns>
     public static AudioClassifier CreateFromModelPath(string modelPath)
     {
-        var baseOptions = new Tasks.Core.CoreBaseOptions(modelAssetPath: modelPath);
-        var options = new AudioClassifierOptions(baseOptions, runningMode: Core.RunningMode.AUDIO_CLIPS);
+        CoreBaseOptions baseOptions = new(modelAssetPath: modelPath);
+        AudioClassifierOptions options = new(baseOptions);
         return CreateFromOptions(options);
     }
 
     /// <summary>
-    ///   Creates the <see cref="AudioClassifier" /> object from <paramref name="options" />.
+    ///     Creates the <see cref="AudioClassifier" /> object from <paramref name="options" />.
     /// </summary>
     /// <param name="options">Options for the audio classifier task.</param>
     /// <returns>
-    ///   <see cref="AudioClassifier" /> object that's created from <paramref name="options" />.
+    ///     <see cref="AudioClassifier" /> object that's created from <paramref name="options" />.
     /// </returns>
     public static AudioClassifier CreateFromOptions(AudioClassifierOptions options)
     {
-        var taskInfo = new Tasks.Core.TaskInfo<AudioClassifierOptions>(
-          taskGraph: _TASK_GRAPH_NAME,
-          inputStreams: [
-              string.Join(":", _AUDIO_TAG, _AUDIO_IN_STREAM_NAME),
-              string.Join(":", _SAMPLE_RATE_TAG, _SAMPLE_RATE_IN_STREAM_NAME),
-          ],
-          outputStreams: [
-              string.Join(":", _CLASSIFICATIONS_TAG, _CLASSIFICATIONS_STREAM_NAME),
-              string.Join(":", _TIMESTAMPED_CLASSIFICATIONS_TAG, _TIMESTAMPED_CLASSIFICATIONS_STREAM_NAME),
-          ],
-          taskOptions: options);
+        TaskInfo<AudioClassifierOptions> taskInfo = new(
+            _TASK_GRAPH_NAME,
+            [
+                string.Join(":", _AUDIO_TAG, _AUDIO_IN_STREAM_NAME),
+                string.Join(":", _SAMPLE_RATE_TAG, _SAMPLE_RATE_IN_STREAM_NAME)
+            ],
+            [
+                string.Join(":", _CLASSIFICATIONS_TAG, _CLASSIFICATIONS_STREAM_NAME),
+                string.Join(":", _TIMESTAMPED_CLASSIFICATIONS_TAG, _TIMESTAMPED_CLASSIFICATIONS_STREAM_NAME)
+            ],
+            options);
 
         return new AudioClassifier(
-          taskInfo.GenerateGraphConfig(options.RunningMode == Core.RunningMode.AUDIO_STREAM),
-          options.RunningMode,
-          BuildPacketsCallback(options));
+            taskInfo.GenerateGraphConfig(options.RunningMode == RunningMode.AUDIO_STREAM),
+            options.RunningMode,
+            BuildPacketsCallback(options));
     }
 
     /// <summary>
-    ///   Performs audio classification on the provided audio clip.
-    ///   Only use this method when the AudioClassifier is created with the audio clips running mode.
-    ///
-    ///   The input audio clip may be longer than what the model is able to process in a single inference.
-    ///   When this occurs, the input audio clip is split into multiple chunks starting at different timestamps.
-    ///   For this reason, this function returns a list of <see cref="AudioClassifierResult"/> objects, each associated
-    ///   with a timestamp corresponding to the start (in milliseconds) of the chunk data that was classified.
+    ///     Performs audio classification on the provided audio clip.
+    ///     Only use this method when the AudioClassifier is created with the audio clips running mode.
+    ///     The input audio clip may be longer than what the model is able to process in a single inference.
+    ///     When this occurs, the input audio clip is split into multiple chunks starting at different timestamps.
+    ///     For this reason, this function returns a list of <see cref="AudioClassifierResult" /> objects, each associated
+    ///     with a timestamp corresponding to the start (in milliseconds) of the chunk data that was classified.
     /// </summary>
     /// <returns>
-    ///   A list of <see cref="AudioClassifierResult"/> that contains a list of classification result objects,
-    ///   each associated with a timestamp corresponding to the start (in milliseconds) of the chunk data that was classified.
+    ///     A list of <see cref="AudioClassifierResult" /> that contains a list of classification result objects,
+    ///     each associated with a timestamp corresponding to the start (in milliseconds) of the chunk data that was
+    ///     classified.
     /// </returns>
     public List<AudioClassifierResult> Classify(Matrix audioClip, double audioSampleRate)
     {
-        using var outputPackets = ClassifyInternal(audioClip, audioSampleRate);
+        using PacketMap outputPackets = ClassifyInternal(audioClip, audioSampleRate);
 
-        var result = new List<AudioClassifierResult>();
+        List<AudioClassifierResult> result = new();
         _ = TryBuildAudioClassifierResultList(outputPackets, result);
         return result;
     }
 
     /// <summary>
-    ///   Performs audio classification on the provided audio clip.
-    ///   Only use this method when the AudioClassifier is created with the audio clips running mode.
-    ///
-    ///   The input audio clip may be longer than what the model is able to process in a single inference.
-    ///   When this occurs, the input audio clip is split into multiple chunks starting at different timestamps.
-    ///   For this reason, this function returns a list of <see cref="AudioClassifierResult"/> objects, each associated
-    ///   with a timestamp corresponding to the start (in milliseconds) of the chunk data that was classified.
+    ///     Performs audio classification on the provided audio clip.
+    ///     Only use this method when the AudioClassifier is created with the audio clips running mode.
+    ///     The input audio clip may be longer than what the model is able to process in a single inference.
+    ///     When this occurs, the input audio clip is split into multiple chunks starting at different timestamps.
+    ///     For this reason, this function returns a list of <see cref="AudioClassifierResult" /> objects, each associated
+    ///     with a timestamp corresponding to the start (in milliseconds) of the chunk data that was classified.
     /// </summary>
     /// <param name="result">
-    ///   <see cref="List{AudioClassifierResult}"/> to which the result will be written.
-    /// 
-    ///   It contains a list of classification result objects,
-    ///   each associated with a timestamp corresponding to the start (in milliseconds) of the chunk data that was classified.
+    ///     <see cref="List{AudioClassifierResult}" /> to which the result will be written.
+    ///     It contains a list of classification result objects,
+    ///     each associated with a timestamp corresponding to the start (in milliseconds) of the chunk data that was
+    ///     classified.
     /// </param>
     /// <returns>
-    ///   <see langword="true"/> if the <see cref="result"/> exists, <see langword="false"/> otherwise.
+    ///     <see langword="true" /> if the <see cref="result" /> exists, <see langword="false" /> otherwise.
     /// </returns>
     public bool TryClassify(Matrix audioClip, double audioSampleRate, List<AudioClassifierResult> result)
     {
-        using var outputPackets = ClassifyInternal(audioClip, audioSampleRate);
+        using PacketMap outputPackets = ClassifyInternal(audioClip, audioSampleRate);
         return TryBuildAudioClassifierResultList(outputPackets, result);
     }
 
     private PacketMap ClassifyInternal(Matrix audioClip, double audioSampleRate)
     {
-        if (audioClip.IsRowMajor)
-        {
-            throw new ArgumentException("Input audio clip must be a column-major matrix.");
-        }
-        var packetMap = new PacketMap();
+        if (audioClip.IsRowMajor) throw new ArgumentException("Input audio clip must be a column-major matrix.");
+        PacketMap packetMap = new();
         packetMap.Emplace(_AUDIO_IN_STREAM_NAME, PacketHelper.CreateColMajorMatrix(audioClip));
         packetMap.Emplace(_SAMPLE_RATE_IN_STREAM_NAME, PacketHelper.CreateDouble(audioSampleRate));
 
@@ -134,25 +132,20 @@ public sealed class AudioClassifier : Core.BaseAudioTaskApi
     }
 
     /// <summary>
-    ///   Sends audio data (a block in a continuous audio stream) to perform audio classification.
-    ///
-    ///   Only use this method when the <see cref="AudioClassifier"/> is created with the audio stream running mode.
-    ///   The input timestamps should be monotonically increasing for adjacent calls of this method.
-    ///   This method will return immediately after the input audio data is accepted. The results will be available via the
-    ///   <see cref="AudioClassifierOptions.ResultCallbackFunc"/> provided in the <see cref="AudioClassifierOptions"/>.
-    ///   The <see cref="ClassifyAsync"/> method is designed to process auido stream data such as microphone input.
-    ///
-    ///   The input audio data may be longer than what the model is able to process in a single inference.
-    ///   When this occurs, the input audio block is split into multiple chunks.
-    ///   For this reason, the callback may be called multiple times (once per chunk) for each call to this function.
+    ///     Sends audio data (a block in a continuous audio stream) to perform audio classification.
+    ///     Only use this method when the <see cref="AudioClassifier" /> is created with the audio stream running mode.
+    ///     The input timestamps should be monotonically increasing for adjacent calls of this method.
+    ///     This method will return immediately after the input audio data is accepted. The results will be available via the
+    ///     <see cref="AudioClassifierOptions.ResultCallbackFunc" /> provided in the <see cref="AudioClassifierOptions" />.
+    ///     The <see cref="ClassifyAsync" /> method is designed to process auido stream data such as microphone input.
+    ///     The input audio data may be longer than what the model is able to process in a single inference.
+    ///     When this occurs, the input audio block is split into multiple chunks.
+    ///     For this reason, the callback may be called multiple times (once per chunk) for each call to this function.
     /// </summary>
     public void ClassifyAsync(Matrix audioClip, double audioSampleRate, long timestampMillisec)
     {
-        if (audioClip.IsRowMajor)
-        {
-            throw new ArgumentException("Input audio clip must be a column-major matrix.");
-        }
-        var timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
+        if (audioClip.IsRowMajor) throw new ArgumentException("Input audio clip must be a column-major matrix.");
+        long timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
 
         if (_defaultSampleRate is null)
         {
@@ -161,34 +154,30 @@ public sealed class AudioClassifier : Core.BaseAudioTaskApi
         }
         else if (audioSampleRate != _defaultSampleRate)
         {
-            throw new ArgumentException($"The audio sample rate provided({audioSampleRate}) is inconsistent with the previous received({_defaultSampleRate}).");
+            throw new ArgumentException(
+                $"The audio sample rate provided({audioSampleRate}) is inconsistent with the previous received({_defaultSampleRate}).");
         }
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_AUDIO_IN_STREAM_NAME, PacketHelper.CreateColMajorMatrixAt(audioClip, timestampMicrosec));
 
         SendAudioStreamData(packetMap);
     }
 
-    private static Tasks.Core.TaskRunner.PacketsCallback? BuildPacketsCallback(AudioClassifierOptions options)
+    private static TaskRunner.PacketsCallback? BuildPacketsCallback(AudioClassifierOptions options)
     {
-        var resultCallback = options.ResultCallback;
-        if (resultCallback == null)
-        {
-            return null;
-        }
-        var result = AudioClassifierResult.Alloc(options.MaxResults ?? 0);
+        AudioClassifierOptions.ResultCallbackFunc? resultCallback = options.ResultCallback;
+        if (resultCallback == null) return null;
+        ClassificationResult result = AudioClassifierResult.Alloc(options.MaxResults ?? 0);
 
-        return (PacketMap outputPackets) =>
+        return outputPackets =>
         {
-            using var outPacket = outputPackets.At<AudioClassifierResult>(_CLASSIFICATIONS_STREAM_NAME);
-            if (outPacket == null || outPacket.IsEmpty())
-            {
-                return;
-            }
+            using Packet<AudioClassifierResult>? outPacket =
+                outputPackets.At<AudioClassifierResult>(_CLASSIFICATIONS_STREAM_NAME);
+            if (outPacket == null || outPacket.IsEmpty()) return;
 
             outPacket.Get(ref result);
-            var timestamp = outPacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
+            long timestamp = outPacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
 
             resultCallback(result, timestamp);
         };
@@ -196,11 +185,9 @@ public sealed class AudioClassifier : Core.BaseAudioTaskApi
 
     private static bool TryBuildAudioClassifierResultList(PacketMap outputPackets, List<AudioClassifierResult> result)
     {
-        using var outPacket = outputPackets.At<List<AudioClassifierResult>>(_TIMESTAMPED_CLASSIFICATIONS_STREAM_NAME);
-        if (outPacket.IsEmpty())
-        {
-            return false;
-        }
+        using Packet<List<AudioClassifierResult>> outPacket =
+            outputPackets.At<List<AudioClassifierResult>>(_TIMESTAMPED_CLASSIFICATIONS_STREAM_NAME);
+        if (outPacket.IsEmpty()) return false;
         outPacket.Get(result);
         return true;
     }

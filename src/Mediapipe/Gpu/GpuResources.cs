@@ -8,11 +8,13 @@ public class GpuResources : MpResourceHandle
     private SharedPtrHandle? _sharedPtrHandle;
 
     /// <param name="ptr">Shared pointer of mediapipe::GpuResources</param>
-    public GpuResources(nint ptr) : base()
+    public GpuResources(nint ptr)
     {
         _sharedPtrHandle = new CSharedPtr(ptr);
         Ptr = _sharedPtrHandle.Get();
     }
+
+    public nint SharedPtr => _sharedPtrHandle == null ? nint.Zero : _sharedPtrHandle.MpPtr;
 
     protected override void DisposeManaged()
     {
@@ -21,6 +23,7 @@ public class GpuResources : MpResourceHandle
             _sharedPtrHandle.Dispose();
             _sharedPtrHandle = null;
         }
+
         base.DisposeManaged();
     }
 
@@ -29,11 +32,9 @@ public class GpuResources : MpResourceHandle
         // Do nothing
     }
 
-    public nint SharedPtr => _sharedPtrHandle == null ? nint.Zero : _sharedPtrHandle.MpPtr;
-
     public static GpuResources Create()
     {
-        UnsafeNativeMethods.mp_GpuResources_Create(out var statusPtr, out var gpuResourcesPtr).Assert();
+        UnsafeNativeMethods.mp_GpuResources_Create(out IntPtr statusPtr, out IntPtr gpuResourcesPtr).Assert();
         AssertStatusOk(statusPtr);
 
         return new GpuResources(gpuResourcesPtr);
@@ -41,7 +42,8 @@ public class GpuResources : MpResourceHandle
 
     public static GpuResources Create(nint externalContext)
     {
-        UnsafeNativeMethods.mp_GpuResources_Create__Pv(externalContext, out var statusPtr, out var gpuResourcesPtr).Assert();
+        UnsafeNativeMethods
+            .mp_GpuResources_Create__Pv(externalContext, out IntPtr statusPtr, out IntPtr gpuResourcesPtr).Assert();
         AssertStatusOk(statusPtr);
 
         return new GpuResources(gpuResourcesPtr);

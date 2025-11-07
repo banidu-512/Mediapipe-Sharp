@@ -15,6 +15,7 @@ internal static partial class SafeNativeMethods
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void mp_PacketMap__clear(IntPtr packetMap);
 
-    [Pure, DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
+    [Pure]
+    [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern int mp_PacketMap__size(IntPtr packetMap);
 }

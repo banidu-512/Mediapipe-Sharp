@@ -3,10 +3,12 @@ using Mediapipe.Framework.Formats;
 using Mediapipe.Framework.Packet;
 using Mediapipe.Gpu;
 using Mediapipe.Tasks.Components.Containers;
+using Mediapipe.Tasks.Core;
+using Mediapipe.Tasks.Vision.Core;
 
 namespace Mediapipe.Tasks.Vision.HandLandmarker;
 
-public sealed class HandLandmarker : Core.BaseVisionTaskApi
+public sealed class HandLandmarker : BaseVisionTaskApi
 {
     private const string _IMAGE_IN_STREAM_NAME = "image_in";
     private const string _IMAGE_OUT_STREAM_NAME = "image_out";
@@ -26,114 +28,112 @@ public sealed class HandLandmarker : Core.BaseVisionTaskApi
     private readonly NormalizedRect _normalizedRect = new();
 
     private HandLandmarker(
-      CalculatorGraphConfig graphConfig,
-      Core.VisionRunningMode runningMode,
-      GpuResources? gpuResources,
-      Tasks.Core.TaskRunner.PacketsCallback? packetCallback) : base(graphConfig, runningMode, gpuResources, packetCallback)
+        CalculatorGraphConfig graphConfig,
+        VisionRunningMode runningMode,
+        GpuResources? gpuResources,
+        TaskRunner.PacketsCallback? packetCallback) : base(graphConfig, runningMode, gpuResources, packetCallback)
     {
-        
     }
 
     /// <summary>
-    ///   Creates an <see cref="HandLandmarker" /> object from a TensorFlow Lite model and the default <see cref="HandLandmarkerOptions" />.
-    ///
-    ///   Note that the created <see cref="HandLandmarker" /> instance is in image mode,
-    ///   for detecting hand landmarks on single image inputs.
+    ///     Creates an <see cref="HandLandmarker" /> object from a TensorFlow Lite model and the default
+    ///     <see cref="HandLandmarkerOptions" />.
+    ///     Note that the created <see cref="HandLandmarker" /> instance is in image mode,
+    ///     for detecting hand landmarks on single image inputs.
     /// </summary>
     /// <param name="modelPath">Path to the model.</param>
     /// <param name="gpuResources">
-    ///   <see cref="GpuResources"/> to set to the underlying <see cref="CalculatorGraph"/>.
-    ///   To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest"/> must be called with it.
+    ///     <see cref="GpuResources" /> to set to the underlying <see cref="CalculatorGraph" />.
+    ///     To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest" /> must be called with it.
     /// </param>
     /// <returns>
-    ///   <see cref="HandLandmarker" /> object that's created from the model and the default <see cref="HandLandmarkerOptions" />.
+    ///     <see cref="HandLandmarker" /> object that's created from the model and the default
+    ///     <see cref="HandLandmarkerOptions" />.
     /// </returns>
     public static HandLandmarker CreateFromModelPath(string modelPath, GpuResources? gpuResources = null)
     {
-        var baseOptions = new Tasks.Core.CoreBaseOptions(modelAssetPath: modelPath);
-        var options = new HandLandmarkerOptions(baseOptions, runningMode: Core.VisionRunningMode.IMAGE);
+        CoreBaseOptions baseOptions = new(modelAssetPath: modelPath);
+        HandLandmarkerOptions options = new(baseOptions);
         return CreateFromOptions(options, gpuResources);
     }
 
     /// <summary>
-    ///   Creates the <see cref="HandLandmarker" /> object from <paramref name="HandLandmarkerOptions" />.
+    ///     Creates the <see cref="HandLandmarker" /> object from <paramref name="HandLandmarkerOptions" />.
     /// </summary>
     /// <param name="options">Options for the hand landmarker task.</param>
     /// <param name="gpuResources">
-    ///   <see cref="GpuResources"/> to set to the underlying <see cref="CalculatorGraph"/>.
-    ///   To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest"/> must be called with it.
+    ///     <see cref="GpuResources" /> to set to the underlying <see cref="CalculatorGraph" />.
+    ///     To share the GL context with MediaPipe, <see cref="GlCalculatorHelper.InitializeForTest" /> must be called with it.
     /// </param>
     /// <returns>
-    ///   <see cref="HandLandmarker" /> object that's created from <paramref name="options" />.
+    ///     <see cref="HandLandmarker" /> object that's created from <paramref name="options" />.
     /// </returns>
     public static HandLandmarker CreateFromOptions(HandLandmarkerOptions options, GpuResources? gpuResources = null)
     {
-        var taskInfo = new Tasks.Core.TaskInfo<HandLandmarkerOptions>(
-          taskGraph: _TASK_GRAPH_NAME,
-          inputStreams: [
-              string.Join(":", _IMAGE_TAG, _IMAGE_IN_STREAM_NAME),
-              string.Join(":", _NORM_RECT_TAG, _NORM_RECT_STREAM_NAME),
-          ],
-          outputStreams: [
-              string.Join(":", _HANDEDNESS_TAG, _HANDEDNESS_STREAM_NAME),
-              string.Join(":", _HAND_LANDMARKS_TAG, _HAND_LANDMARKS_STREAM_NAME),
-              string.Join(":", _HAND_WORLD_LANDMARKS_TAG, _HAND_WORLD_LANDMARKS_STREAM_NAME),
-              string.Join(":", _IMAGE_TAG, _IMAGE_OUT_STREAM_NAME),
-          ],
-          taskOptions: options);
+        TaskInfo<HandLandmarkerOptions> taskInfo = new(
+            _TASK_GRAPH_NAME,
+            [
+                string.Join(":", _IMAGE_TAG, _IMAGE_IN_STREAM_NAME),
+                string.Join(":", _NORM_RECT_TAG, _NORM_RECT_STREAM_NAME)
+            ],
+            [
+                string.Join(":", _HANDEDNESS_TAG, _HANDEDNESS_STREAM_NAME),
+                string.Join(":", _HAND_LANDMARKS_TAG, _HAND_LANDMARKS_STREAM_NAME),
+                string.Join(":", _HAND_WORLD_LANDMARKS_TAG, _HAND_WORLD_LANDMARKS_STREAM_NAME),
+                string.Join(":", _IMAGE_TAG, _IMAGE_OUT_STREAM_NAME)
+            ],
+            options);
 
         return new HandLandmarker(
-          taskInfo.GenerateGraphConfig(options.RunningMode == Core.VisionRunningMode.LIVE_STREAM),
-          options.RunningMode,
-          gpuResources,
-          BuildPacketsCallback(options));
+            taskInfo.GenerateGraphConfig(options.RunningMode == VisionRunningMode.LIVE_STREAM),
+            options.RunningMode,
+            gpuResources,
+            BuildPacketsCallback(options));
     }
 
     /// <summary>
-    ///   Performs hand landmarks detection on the provided MediaPipe Image.
-    ///
-    ///   Only use this method when the <see cref="HandLandmarker" /> is created with the image running mode.
-    ///   The image can be of any size with format RGB or RGBA.
+    ///     Performs hand landmarks detection on the provided MediaPipe Image.
+    ///     Only use this method when the <see cref="HandLandmarker" /> is created with the image running mode.
+    ///     The image can be of any size with format RGB or RGBA.
     /// </summary>
     /// <param name="image">MediaPipe Image.</param>
     /// <param name="imageProcessingOptions">Options for image processing.</param>
     /// <returns>
-    ///   The hand landmarks detection results.
+    ///     The hand landmarks detection results.
     /// </returns>
-    public HandLandmarkerResult Detect(Image image, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    public HandLandmarkerResult Detect(Image image, ImageProcessingOptions? imageProcessingOptions = null)
     {
-        using var outputPackets = DetectInternal(image, imageProcessingOptions);
+        using PacketMap outputPackets = DetectInternal(image, imageProcessingOptions);
 
-        var result = default(HandLandmarkerResult);
+        HandLandmarkerResult result = default;
         _ = TryBuildHandLandmarkerResult(outputPackets, ref result);
         return result;
     }
 
     /// <summary>
-    ///   Performs hand landmarks detection on the provided MediaPipe Image.
-    ///
-    ///   Only use this method when the <see cref="HandLandmarker" /> is created with the image running mode.
-    ///   The image can be of any size with format RGB or RGBA.
+    ///     Performs hand landmarks detection on the provided MediaPipe Image.
+    ///     Only use this method when the <see cref="HandLandmarker" /> is created with the image running mode.
+    ///     The image can be of any size with format RGB or RGBA.
     /// </summary>
     /// <param name="image">MediaPipe Image.</param>
     /// <param name="imageProcessingOptions">Options for image processing.</param>
     /// <param name="result">
-    ///   <see cref="HandLandmarkerResult"/> to which the result will be written.
+    ///     <see cref="HandLandmarkerResult" /> to which the result will be written.
     /// </param>
     /// <returns>
-    ///   <see langword="true"/> if some faces are detected, <see langword="false"/> otherwise.
+    ///     <see langword="true" /> if some faces are detected, <see langword="false" /> otherwise.
     /// </returns>
-    public bool TryDetect(Image image, Core.ImageProcessingOptions? imageProcessingOptions, ref HandLandmarkerResult result)
+    public bool TryDetect(Image image, ImageProcessingOptions? imageProcessingOptions, ref HandLandmarkerResult result)
     {
-        using var outputPackets = DetectInternal(image, imageProcessingOptions);
+        using PacketMap outputPackets = DetectInternal(image, imageProcessingOptions);
         return TryBuildHandLandmarkerResult(outputPackets, ref result);
     }
 
-    private PacketMap DetectInternal(Image image, Core.ImageProcessingOptions? imageProcessingOptions)
+    private PacketMap DetectInternal(Image image, ImageProcessingOptions? imageProcessingOptions)
     {
-        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, roiAllowed: false);
+        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, false);
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_IMAGE_IN_STREAM_NAME, PacketHelper.CreateImage(image));
         packetMap.Emplace(_NORM_RECT_STREAM_NAME, PacketHelper.CreateProto(_normalizedRect));
 
@@ -141,54 +141,55 @@ public sealed class HandLandmarker : Core.BaseVisionTaskApi
     }
 
     /// <summary>
-    ///   Performs hand landmarks detection on the provided video frames.
-    ///
-    ///   Only use this method when the HandLandmarker is created with the video
-    ///   running mode. It's required to provide the video frame's timestamp (in
-    ///   milliseconds) along with the video frame. The input timestamps should be
-    ///   monotonically increasing for adjacent calls of this method.
+    ///     Performs hand landmarks detection on the provided video frames.
+    ///     Only use this method when the HandLandmarker is created with the video
+    ///     running mode. It's required to provide the video frame's timestamp (in
+    ///     milliseconds) along with the video frame. The input timestamps should be
+    ///     monotonically increasing for adjacent calls of this method.
     /// </summary>
     /// <returns>
-    ///   The hand landmarks detection results.
+    ///     The hand landmarks detection results.
     /// </returns>
-    public HandLandmarkerResult DetectForVideo(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    public HandLandmarkerResult DetectForVideo(Image image, long timestampMillisec,
+        ImageProcessingOptions? imageProcessingOptions = null)
     {
-        using var outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
+        using PacketMap outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
 
-        var result = default(HandLandmarkerResult);
+        HandLandmarkerResult result = default;
         _ = TryBuildHandLandmarkerResult(outputPackets, ref result);
         return result;
     }
 
     /// <summary>
-    ///   Performs hand landmarks detection on the provided video frames.
-    ///
-    ///   Only use this method when the HandLandmarker is created with the video
-    ///   running mode. It's required to provide the video frame's timestamp (in
-    ///   milliseconds) along with the video frame. The input timestamps should be
-    ///   monotonically increasing for adjacent calls of this method.
+    ///     Performs hand landmarks detection on the provided video frames.
+    ///     Only use this method when the HandLandmarker is created with the video
+    ///     running mode. It's required to provide the video frame's timestamp (in
+    ///     milliseconds) along with the video frame. The input timestamps should be
+    ///     monotonically increasing for adjacent calls of this method.
     /// </summary>
     /// <remarks>
-    ///   When hands are not found, <paramref name="result"/> won't be overwritten.
+    ///     When hands are not found, <paramref name="result" /> won't be overwritten.
     /// </remarks>
     /// <param name="result">
-    ///   <see cref="HandLandmarkerResult"/> to which the result will be written.
+    ///     <see cref="HandLandmarkerResult" /> to which the result will be written.
     /// </param>
     /// <returns>
-    ///   <see langword="true"/> if some hands are detected, <see langword="false"/> otherwise.
+    ///     <see langword="true" /> if some hands are detected, <see langword="false" /> otherwise.
     /// </returns>
-    public bool TryDetectForVideo(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions, ref HandLandmarkerResult result)
+    public bool TryDetectForVideo(Image image, long timestampMillisec, ImageProcessingOptions? imageProcessingOptions,
+        ref HandLandmarkerResult result)
     {
-        using var outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
+        using PacketMap outputPackets = DetectForVideoInternal(image, timestampMillisec, imageProcessingOptions);
         return TryBuildHandLandmarkerResult(outputPackets, ref result);
     }
 
-    private PacketMap DetectForVideoInternal(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    private PacketMap DetectForVideoInternal(Image image, long timestampMillisec,
+        ImageProcessingOptions? imageProcessingOptions = null)
     {
-        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, roiAllowed: false);
-        var timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
+        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, false);
+        long timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_IMAGE_IN_STREAM_NAME, PacketHelper.CreateImageAt(image, timestampMicrosec));
         packetMap.Emplace(_NORM_RECT_STREAM_NAME, PacketHelper.CreateProtoAt(_normalizedRect, timestampMicrosec));
 
@@ -196,79 +197,68 @@ public sealed class HandLandmarker : Core.BaseVisionTaskApi
     }
 
     /// <summary>
-    ///   Sends live image data to perform hand landmarks detection.
-    ///
-    ///   Only use this method when the HandLandmarker is created with the live stream
-    ///   running mode. The input timestamps should be monotonically increasing for
-    ///   adjacent calls of this method. This method will return immediately after the
-    ///   input image is accepted. The results will be available via the
-    ///   <see cref="HandLandmarkerOptions.ResultCallbackFunc" /> provided in the <see cref="HandLandmarkerOptions" />.
-    ///   The <see cref="DetectAsync" /> method is designed to process live stream data such as camera
-    ///   input. To lower the overall latency, hand landmarker may drop the input
-    ///   images if needed. In other words, it's not guaranteed to have output per
-    ///   input image.
+    ///     Sends live image data to perform hand landmarks detection.
+    ///     Only use this method when the HandLandmarker is created with the live stream
+    ///     running mode. The input timestamps should be monotonically increasing for
+    ///     adjacent calls of this method. This method will return immediately after the
+    ///     input image is accepted. The results will be available via the
+    ///     <see cref="HandLandmarkerOptions.ResultCallbackFunc" /> provided in the <see cref="HandLandmarkerOptions" />.
+    ///     The <see cref="DetectAsync" /> method is designed to process live stream data such as camera
+    ///     input. To lower the overall latency, hand landmarker may drop the input
+    ///     images if needed. In other words, it's not guaranteed to have output per
+    ///     input image.
     /// </summary>
-    public void DetectAsync(Image image, long timestampMillisec, Core.ImageProcessingOptions? imageProcessingOptions = null)
+    public void DetectAsync(Image image, long timestampMillisec, ImageProcessingOptions? imageProcessingOptions = null)
     {
-        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, roiAllowed: false);
-        var timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
+        ConfigureNormalizedRect(_normalizedRect, imageProcessingOptions, image, false);
+        long timestampMicrosec = timestampMillisec * _MICRO_SECONDS_PER_MILLISECOND;
 
-        var packetMap = new PacketMap();
+        PacketMap packetMap = new();
         packetMap.Emplace(_IMAGE_IN_STREAM_NAME, PacketHelper.CreateImageAt(image, timestampMicrosec));
         packetMap.Emplace(_NORM_RECT_STREAM_NAME, PacketHelper.CreateProtoAt(_normalizedRect, timestampMicrosec));
 
         SendLiveStreamData(packetMap);
     }
 
-    private static Tasks.Core.TaskRunner.PacketsCallback? BuildPacketsCallback(HandLandmarkerOptions options)
+    private static TaskRunner.PacketsCallback? BuildPacketsCallback(HandLandmarkerOptions options)
     {
-        var resultCallback = options.ResultCallback;
-        if (resultCallback == null)
+        HandLandmarkerOptions.ResultCallbackFunc? resultCallback = options.ResultCallback;
+        if (resultCallback == null) return null;
+
+        HandLandmarkerResult handLandmarkerResult = HandLandmarkerResult.Alloc(options.NumHands);
+
+        return outputPackets =>
         {
-            return null;
-        }
+            using Packet<Image>? outImagePacket = outputPackets.At<Image>(_IMAGE_OUT_STREAM_NAME);
+            if (outImagePacket == null || outImagePacket.IsEmpty()) return;
 
-        var handLandmarkerResult = HandLandmarkerResult.Alloc(options.NumHands);
-
-        return (PacketMap outputPackets) =>
-        {
-            using var outImagePacket = outputPackets.At<Image>(_IMAGE_OUT_STREAM_NAME);
-            if (outImagePacket == null || outImagePacket.IsEmpty())
-            {
-                return;
-            }
-
-            using var image = outImagePacket.Get();
-            var timestamp = outImagePacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
+            using Image image = outImagePacket.Get();
+            long timestamp = outImagePacket.TimestampMicroseconds() / _MICRO_SECONDS_PER_MILLISECOND;
 
             if (TryBuildHandLandmarkerResult(outputPackets, ref handLandmarkerResult))
-            {
                 resultCallback(handLandmarkerResult, image, timestamp);
-            }
             else
-            {
                 resultCallback(default, image, timestamp);
-            }
         };
     }
 
     private static bool TryBuildHandLandmarkerResult(PacketMap outputPackets, ref HandLandmarkerResult result)
     {
-        using var handLandmarksPacket = outputPackets.At<List<NormalizedLandmarks>>(_HAND_LANDMARKS_STREAM_NAME);
-        if (handLandmarksPacket.IsEmpty())
-        {
-            return false;
-        }
+        using Packet<List<NormalizedLandmarks>> handLandmarksPacket =
+            outputPackets.At<List<NormalizedLandmarks>>(_HAND_LANDMARKS_STREAM_NAME);
+        if (handLandmarksPacket.IsEmpty()) return false;
 
-        var handLandmarks = result.HandLandmarks ?? [];
+        List<NormalizedLandmarks> handLandmarks = result.HandLandmarks ?? [];
         handLandmarksPacket.Get(handLandmarks);
 
-        using var handednessPacket = outputPackets.At<List<Classifications>>(_HANDEDNESS_STREAM_NAME);
-        var handedness = result.Handedness ?? [];
+        using Packet<List<Classifications>> handednessPacket =
+            outputPackets.At<List<Classifications>>(_HANDEDNESS_STREAM_NAME);
+        List<Classifications> handedness = result.Handedness ?? [];
         handednessPacket.Get(handedness);
 
-        using var handWorldLandmarksPacket = outputPackets.At<List<Landmarks>>(_HAND_WORLD_LANDMARKS_STREAM_NAME);
-        var handWorldLandmarks = result.HandWorldLandmarks ?? [];
+        using Packet<List<Landmarks>> handWorldLandmarksPacket =
+            outputPackets.At<List<Landmarks>>(_HAND_WORLD_LANDMARKS_STREAM_NAME);
+        List<Landmarks> handWorldLandmarks = result.HandWorldLandmarks ?? [];
         handWorldLandmarksPacket.Get(handWorldLandmarks);
 
         result = new HandLandmarkerResult(handedness, handLandmarks, handWorldLandmarks);

@@ -16,7 +16,7 @@ internal readonly struct StructArray<T> where T : unmanaged
 
     public List<T> Copy()
     {
-        var data = new List<T>(_size);
+        List<T> data = new(_size);
 
         CopyTo(data);
         return data;
@@ -28,12 +28,9 @@ internal readonly struct StructArray<T> where T : unmanaged
 
         unsafe
         {
-            var ptr = (T*)_data;
+            T* ptr = (T*)_data;
 
-            for (var i = 0; i < _size; i++)
-            {
-                data.Add(*ptr++);
-            }
+            for (int i = 0; i < _size; i++) data.Add(*ptr++);
         }
     }
 }

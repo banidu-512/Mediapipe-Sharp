@@ -7,32 +7,10 @@ public class GlContext : MpResourceHandle
 {
     private SharedPtrHandle? _sharedPtrHandle;
 
-    public static GlContext? GetCurrent()
-    {
-        UnsafeNativeMethods.mp_GlContext_GetCurrent(out var glContextPtr).Assert();
-
-        return glContextPtr == nint.Zero ? null : new GlContext(glContextPtr);
-    }
-
     public GlContext(nint ptr, bool isOwner = true) : base(isOwner)
     {
         _sharedPtrHandle = new CSharedPtr(ptr, isOwner);
         Ptr = _sharedPtrHandle.Get();
-    }
-
-    protected override void DisposeManaged()
-    {
-        if (_sharedPtrHandle != null)
-        {
-            _sharedPtrHandle.Dispose();
-            _sharedPtrHandle = null;
-        }
-        base.DisposeManaged();
-    }
-
-    protected override void DeleteMpPtr()
-    {
-        // Do nothing
     }
 
     public nint SharedPtr => _sharedPtrHandle == null ? nint.Zero : _sharedPtrHandle.MpPtr;
@@ -47,20 +25,45 @@ public class GlContext : MpResourceHandle
     public IntPtr nsglContext => SafeNativeMethods.mp_GlContext__nsgl_context(MpPtr);
     public IntPtr eaglContext => SafeNativeMethods.mp_GlContext__eagl_context(MpPtr);
 
-    public bool IsCurrent()
-    {
-        return SafeNativeMethods.mp_GlContext__IsCurrent(MpPtr);
-    }
-
     public int glMajorVersion => SafeNativeMethods.mp_GlContext__gl_major_version(MpPtr);
 
     public int glMinorVersion => SafeNativeMethods.mp_GlContext__gl_minor_version(MpPtr);
 
     public long glFinishCount => SafeNativeMethods.mp_GlContext__gl_finish_count(MpPtr);
 
+    public static GlContext? GetCurrent()
+    {
+        UnsafeNativeMethods.mp_GlContext_GetCurrent(out IntPtr glContextPtr).Assert();
+
+        return glContextPtr == nint.Zero ? null : new GlContext(glContextPtr);
+    }
+
+    protected override void DisposeManaged()
+    {
+        if (_sharedPtrHandle != null)
+        {
+            _sharedPtrHandle.Dispose();
+            _sharedPtrHandle = null;
+        }
+
+        base.DisposeManaged();
+    }
+
+    protected override void DeleteMpPtr()
+    {
+        // Do nothing
+    }
+
+    public bool IsCurrent()
+    {
+        return SafeNativeMethods.mp_GlContext__IsCurrent(MpPtr);
+    }
+
     private class CSharedPtr : SharedPtrHandle
     {
-        public CSharedPtr(nint ptr, bool isOwner = true) : base(ptr, isOwner) { }
+        public CSharedPtr(nint ptr, bool isOwner = true) : base(ptr, isOwner)
+        {
+        }
 
         protected override void DeleteMpPtr()
         {

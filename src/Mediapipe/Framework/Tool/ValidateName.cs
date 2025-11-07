@@ -3,10 +3,9 @@ using System.Text.RegularExpressions;
 namespace Mediapipe.Framework.Tool;
 
 /// <summary>
-///   translated version of mediapipe/framework/tool/validate_name.cc
-/// <summary/>
-
-internal static partial class Internal
+///     translated version of mediapipe/framework/tool/validate_name.cc
+///     <summary />
+internal static class Internal
 {
     public const int MaxCollectionItemId = 10000;
 }
@@ -22,42 +21,35 @@ public static partial class Tool
 
     [GeneratedRegex("^[a-z_][a-z0-9_]*$")]
     internal static partial Regex MyRegex1();
+
     [GeneratedRegex("^(0|[1-9][0-9]*)$")]
     internal static partial Regex MyRegex2();
+
     [GeneratedRegex("^[A-Z_][A-Z0-9_]*$")]
     internal static partial Regex MyRegex3();
 
     public static void ValidateName(string name)
     {
-        if (name.Length > 0 && MyRegex1().IsMatch(name))
-        {
-            return;
-        }
+        if (name.Length > 0 && MyRegex1().IsMatch(name)) return;
         throw new ArgumentException($"Name \"{name}\" does not match \"{_NameRegex}\".");
     }
 
     public static void ValidateNumber(string number)
     {
-        if (number.Length > 0 && MyRegex2().IsMatch(number))
-        {
-            return;
-        }
+        if (number.Length > 0 && MyRegex2().IsMatch(number)) return;
         throw new ArgumentException($"Number \"{number}\" does not match \"{_NumberRegex}\".");
     }
 
     public static void ValidateTag(string tag)
     {
-        if (tag.Length > 0 && MyRegex3().IsMatch(tag))
-        {
-            return;
-        }
+        if (tag.Length > 0 && MyRegex3().IsMatch(tag)) return;
         throw new ArgumentException($"Tag \"{tag}\" does not match \"{_TagRegex}\".");
     }
 
     public static void ParseTagAndName(string tagAndName, out string tag, out string name)
     {
-        var nameIndex = -1;
-        var v = tagAndName.Split(':');
+        int nameIndex = -1;
+        string[] v = tagAndName.Split(':');
 
         try
         {
@@ -73,14 +65,12 @@ public static partial class Tool
                 nameIndex = 1;
             }
 
-            if (nameIndex == -1)
-            {
-                throw new ArgumentException("tagAndName is invalid", nameof(tagAndName));
-            }
+            if (nameIndex == -1) throw new ArgumentException("tagAndName is invalid", nameof(tagAndName));
         }
         catch (ArgumentException)
         {
-            throw new ArgumentException($"\"tag and name\" is invalid, \"{tagAndName}\" does not match \"{_TagAndNameRegex}\" (examples: \"TAG:name\", \"longer_name\").");
+            throw new ArgumentException(
+                $"\"tag and name\" is invalid, \"{tagAndName}\" does not match \"{_TagAndNameRegex}\" (examples: \"TAG:name\", \"longer_name\").");
         }
 
         tag = nameIndex == 1 ? v[0] : "";
@@ -89,9 +79,9 @@ public static partial class Tool
 
     public static void ParseTagIndexName(string tagIndexName, out string tag, out int index, out string name)
     {
-        var nameIndex = -1;
-        var theIndex = 0;
-        var v = tagIndexName.Split(':');
+        int nameIndex = -1;
+        int theIndex = 0;
+        string[] v = tagIndexName.Split(':');
 
         try
         {
@@ -112,20 +102,19 @@ public static partial class Tool
                 ValidateTag(v[0]);
                 ValidateNumber(v[1]);
 
-                theIndex = int.TryParse(v[1], out var result) && result <= Internal.MaxCollectionItemId 
-                    ? result : throw new ArgumentException("tagIndexName is invalid", nameof(tagIndexName));
+                theIndex = int.TryParse(v[1], out int result) && result <= Internal.MaxCollectionItemId
+                    ? result
+                    : throw new ArgumentException("tagIndexName is invalid", nameof(tagIndexName));
                 ValidateName(v[2]);
                 nameIndex = 2;
             }
 
-            if (nameIndex == -1)
-            {
-                throw new ArgumentException("tagIndexName is invalid", nameof(tagIndexName));
-            }
+            if (nameIndex == -1) throw new ArgumentException("tagIndexName is invalid", nameof(tagIndexName));
         }
         catch (ArgumentException)
         {
-            throw new ArgumentException($"TAG:index:name is invalid, \"{tagIndexName}\" does not match \"{_TagIndexNameRegex}\" (examples: \"TAG:name\", \"VIDEO:2:name_b\", \"longer_name\").");
+            throw new ArgumentException(
+                $"TAG:index:name is invalid, \"{tagIndexName}\" does not match \"{_TagIndexNameRegex}\" (examples: \"TAG:name\", \"VIDEO:2:name_b\", \"longer_name\").");
         }
 
         tag = nameIndex != 0 ? v[0] : "";
@@ -135,39 +124,32 @@ public static partial class Tool
 
     public static void ParseTagIndex(string tagIndex, out string tag, out int index)
     {
-        var theIndex = -1;
-        var v = tagIndex.Split(':');
+        int theIndex = -1;
+        string[] v = tagIndex.Split(':');
 
         try
         {
             if (v.Length == 1)
             {
-                if (v[0].Length != 0)
-                {
-                    ValidateTag(v[0]);
-                }
+                if (v[0].Length != 0) ValidateTag(v[0]);
                 theIndex = 0;
             }
             else if (v.Length == 2)
             {
-                if (v[0].Length != 0)
-                {
-                    ValidateTag(v[0]);
-                }
+                if (v[0].Length != 0) ValidateTag(v[0]);
                 ValidateNumber(v[1]);
 
-                theIndex = int.TryParse(v[1], out var result) && result <= Internal.MaxCollectionItemId 
-                    ? result : throw new ArgumentException("tagIndex is invalid", nameof(tagIndex));
+                theIndex = int.TryParse(v[1], out int result) && result <= Internal.MaxCollectionItemId
+                    ? result
+                    : throw new ArgumentException("tagIndex is invalid", nameof(tagIndex));
             }
 
-            if (theIndex == -1)
-            {
-                throw new ArgumentException("tagIndex is invalid", nameof(tagIndex));
-            }
+            if (theIndex == -1) throw new ArgumentException("tagIndex is invalid", nameof(tagIndex));
         }
         catch (ArgumentException)
         {
-            throw new ArgumentException($"TAG:index is invalid, \"{tagIndex}\" does not match \"{_TagIndexRegex}\" (examples: \"TAG\", \"VIDEO:2\").");
+            throw new ArgumentException(
+                $"TAG:index is invalid, \"{tagIndex}\" does not match \"{_TagIndexRegex}\" (examples: \"TAG\", \"VIDEO:2\").");
         }
 
         tag = v[0];

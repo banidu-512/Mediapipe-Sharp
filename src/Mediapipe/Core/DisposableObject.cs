@@ -4,13 +4,15 @@ namespace Mediapipe.Core;
 
 public abstract class DisposableObject(bool isOwner) : IDisposable
 {
-    private volatile int _disposeSignaled = 0;
+    private volatile int _disposeSignaled;
     private bool _isLocked;
 
-    public bool IsDisposed { get; protected set; } = false;
-    protected bool IsOwner { get; private set; } = isOwner;
+    protected DisposableObject() : this(true)
+    {
+    }
 
-    protected DisposableObject() : this(true) { }
+    public bool IsDisposed { get; protected set; }
+    protected bool IsOwner { get; private set; } = isOwner;
 
     public void Dispose()
     {
@@ -20,22 +22,13 @@ public abstract class DisposableObject(bool isOwner) : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (_isLocked)
-        {
-            throw new InvalidOperationException("Cannot dispose a locked object, unlock it first");
-        }
+        if (_isLocked) throw new InvalidOperationException("Cannot dispose a locked object, unlock it first");
 
-        if (Interlocked.Exchange(ref _disposeSignaled, 1) != 0)
-        {
-            return;
-        }
+        if (Interlocked.Exchange(ref _disposeSignaled, 1) != 0) return;
 
         IsDisposed = true;
 
-        if (disposing)
-        {
-            DisposeManaged();
-        }
+        if (disposing) DisposeManaged();
         DisposeUnmanaged();
     }
 
@@ -44,12 +37,16 @@ public abstract class DisposableObject(bool isOwner) : IDisposable
         Dispose(false);
     }
 
-    protected virtual void DisposeManaged() { }
+    protected virtual void DisposeManaged()
+    {
+    }
 
-    protected virtual void DisposeUnmanaged() { }
+    protected virtual void DisposeUnmanaged()
+    {
+    }
 
     /// <summary>
-    ///   Lock the object to prevent it from being disposed.
+    ///     Lock the object to prevent it from being disposed.
     /// </summary>
     internal void Lock()
     {
@@ -57,7 +54,7 @@ public abstract class DisposableObject(bool isOwner) : IDisposable
     }
 
     /// <summary>
-    ///   Unlock the object to allow it to be disposed.
+    ///     Unlock the object to allow it to be disposed.
     /// </summary>
     internal void Unlock()
     {
@@ -72,9 +69,6 @@ public abstract class DisposableObject(bool isOwner) : IDisposable
 
     protected void ThrowIfDisposed()
     {
-        if (IsDisposed)
-        {
-            throw new ObjectDisposedException(GetType().FullName);
-        }
+        if (IsDisposed) throw new ObjectDisposedException(GetType().FullName);
     }
 }

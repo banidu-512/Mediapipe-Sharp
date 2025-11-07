@@ -11,6 +11,7 @@ internal static partial class UnsafeNativeMethods
     public static extern void delete_array__Pf(IntPtr str);
 
     #region String
+
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void std_string__delete(IntPtr str);
 
@@ -19,5 +20,6 @@ internal static partial class UnsafeNativeMethods
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern void std_string__swap__Rstr(IntPtr src, IntPtr dst);
+
     #endregion
 }

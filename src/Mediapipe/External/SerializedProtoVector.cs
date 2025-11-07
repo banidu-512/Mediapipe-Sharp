@@ -17,7 +17,7 @@ internal readonly struct SerializedProtoVector
 
     public List<T> Deserialize<T>(MessageParser<T> parser) where T : IMessage<T>
     {
-        var protos = new List<T>(_size);
+        List<T> protos = new(_size);
 
         Deserialize(parser, protos);
 
@@ -25,7 +25,7 @@ internal readonly struct SerializedProtoVector
     }
 
     /// <summary>
-    ///   Deserializes the data as a list of <typeparamref name="T" />.
+    ///     Deserializes the data as a list of <typeparamref name="T" />.
     /// </summary>
     /// <param name="protos">A list of <typeparamref name="T" /> to populate</param>
     public void Deserialize<T>(MessageParser<T> parser, List<T> protos) where T : IMessage<T>
@@ -35,34 +35,35 @@ internal readonly struct SerializedProtoVector
     }
 
     /// <summary>
-    ///   Deserializes the data as a list of <typeparamref name="T" />.
+    ///     Deserializes the data as a list of <typeparamref name="T" />.
     /// </summary>
     /// <remarks>
-    ///   The deserialized data will be merged into <paramref name="protos" />.
-    ///   You may want to clear each field of <typeparamref name="T"/> before calling this method.
-    ///   If <see cref="_size"/> is less than <paramref name="protos" />.Count, the superfluous elements in <paramref name="protos" /> will be untouched.
+    ///     The deserialized data will be merged into <paramref name="protos" />.
+    ///     You may want to clear each field of <typeparamref name="T" /> before calling this method.
+    ///     If <see cref="_size" /> is less than <paramref name="protos" />.Count, the superfluous elements in
+    ///     <paramref name="protos" /> will be untouched.
     /// </remarks>
     /// <param name="protos">A list of <typeparamref name="T" /> to populate</param>
     /// <returns>
-    ///   The number of written elements in <paramref name="protos" />.
+    ///     The number of written elements in <paramref name="protos" />.
     /// </returns>
     public int WriteTo<T>(MessageParser<T> parser, List<T> protos) where T : IMessage<T>
     {
         unsafe
         {
-            var protoPtr = (SerializedProto*)_data;
+            SerializedProto* protoPtr = (SerializedProto*)_data;
 
             // overwrite the existing list
-            var len = Math.Min(_size, protos.Count);
-            for (var i = 0; i < len; i++)
+            int len = Math.Min(_size, protos.Count);
+            for (int i = 0; i < len; i++)
             {
-                var serializedProto = Marshal.PtrToStructure<SerializedProto>((nint)protoPtr++);
+                SerializedProto serializedProto = Marshal.PtrToStructure<SerializedProto>((nint)protoPtr++);
                 serializedProto.WriteTo(protos[i]);
             }
 
-            for (var i = protos.Count; i < _size; i++)
+            for (int i = protos.Count; i < _size; i++)
             {
-                var serializedProto = Marshal.PtrToStructure<SerializedProto>((nint)protoPtr++);
+                SerializedProto serializedProto = Marshal.PtrToStructure<SerializedProto>((nint)protoPtr++);
                 protos.Add(serializedProto.Deserialize(parser));
             }
         }

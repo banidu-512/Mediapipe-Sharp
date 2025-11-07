@@ -3,7 +3,7 @@ using Mediapipe.TranMarshal;
 namespace Mediapipe.Tasks.Components.Containers;
 
 /// <summary>
-///   Defines a rectangle, used e.g. as part of detection results or as input region-of-interest.
+///     Defines a rectangle, used e.g. as part of detection results or as input region-of-interest.
 /// </summary>
 public readonly struct Rect
 {
@@ -20,17 +20,21 @@ public readonly struct Rect
         Bottom = bottom;
     }
 
-    internal Rect(NativeRect nativeRect) : this(nativeRect.Left, nativeRect.Top, nativeRect.Right, nativeRect.Bottom) { }
+    internal Rect(NativeRect nativeRect) : this(nativeRect.Left, nativeRect.Top, nativeRect.Right, nativeRect.Bottom)
+    {
+    }
 
-    public override string ToString() => $"{{ \"left\": {Left}, \"top\": {Top}, \"right\": {Right}, \"bottom\": {Bottom} }}";
+    public override string ToString()
+    {
+        return $"{{ \"left\": {Left}, \"top\": {Top}, \"right\": {Right}, \"bottom\": {Bottom} }}";
+    }
 }
 
 /// <summary>
-///   A rectangle, used as part of detection results or as input region-of-interest.
-///
-///   The coordinates are normalized wrt the image dimensions, i.e. generally in
-///   [0,1] but they may exceed these bounds if describing a region overlapping the
-///   image. The origin is on the top-left corner of the image.
+///     A rectangle, used as part of detection results or as input region-of-interest.
+///     The coordinates are normalized wrt the image dimensions, i.e. generally in
+///     [0,1] but they may exceed these bounds if describing a region overlapping the
+///     image. The origin is on the top-left corner of the image.
 /// </summary>
 public readonly struct RectF : IEquatable<RectF>
 {
@@ -49,22 +53,41 @@ public readonly struct RectF : IEquatable<RectF>
         this.bottom = bottom;
     }
 
-    internal RectF(NativeRectF nativeRect) : this(nativeRect.Left, nativeRect.Top, nativeRect.Right, nativeRect.Bottom) { }
+    internal RectF(NativeRectF nativeRect) : this(nativeRect.Left, nativeRect.Top, nativeRect.Right, nativeRect.Bottom)
+    {
+    }
 
-    public override bool Equals(object? obj) => obj is RectF other && Equals(other);
+    public override bool Equals(object? obj)
+    {
+        return obj is RectF other && Equals(other);
+    }
 
     bool IEquatable<RectF>.Equals(RectF other)
     {
         return MathF.Abs(left - other.left) < _RectFTolerance &&
-          MathF.Abs(top - other.top) < _RectFTolerance &&
-          MathF.Abs(right - other.right) < _RectFTolerance &&
-          MathF.Abs(bottom - other.bottom) < _RectFTolerance;
+               MathF.Abs(top - other.top) < _RectFTolerance &&
+               MathF.Abs(right - other.right) < _RectFTolerance &&
+               MathF.Abs(bottom - other.bottom) < _RectFTolerance;
     }
 
     // TODO: use HashCode.Combine
-    public override int GetHashCode() => Tuple.Create(left, top, right, bottom).GetHashCode();
-    public static bool operator ==(RectF lhs, RectF rhs) => lhs.Equals(rhs);
-    public static bool operator !=(RectF lhs, RectF rhs) => !(lhs == rhs);
+    public override int GetHashCode()
+    {
+        return Tuple.Create(left, top, right, bottom).GetHashCode();
+    }
 
-    public override string ToString() => $"{{ \"left\": {left}, \"top\": {top}, \"right\": {right}, \"bottom\": {bottom} }}";
+    public static bool operator ==(RectF lhs, RectF rhs)
+    {
+        return lhs.Equals(rhs);
+    }
+
+    public static bool operator !=(RectF lhs, RectF rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    public override string ToString()
+    {
+        return $"{{ \"left\": {left}, \"top\": {top}, \"right\": {right}, \"bottom\": {bottom} }}";
+    }
 }

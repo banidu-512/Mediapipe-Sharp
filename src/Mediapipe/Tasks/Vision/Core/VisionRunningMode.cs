@@ -4,5 +4,5 @@ public enum VisionRunningMode
 {
     IMAGE,
     VIDEO,
-    LIVE_STREAM,
+    LIVE_STREAM
 }

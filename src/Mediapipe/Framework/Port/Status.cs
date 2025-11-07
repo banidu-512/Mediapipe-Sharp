@@ -4,7 +4,7 @@ using Mediapipe.PInvoke;
 
 namespace Mediapipe.Framework.Port;
 
-public enum StatusCode : int
+public enum StatusCode
 {
     Ok = 0,
     Cancelled = 1,
@@ -22,7 +22,7 @@ public enum StatusCode : int
     Internal = 13,
     Unavailable = 14,
     DataLoss = 15,
-    Unauthenticated = 16,
+    Unauthenticated = 16
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -34,7 +34,7 @@ public readonly struct StatusArgs
     private StatusArgs(StatusCode code, string? message = null)
     {
         _code = code;
-        _message = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(message);
+        _message = Marshal.StringToHGlobalAnsi(message);
     }
 
     public static StatusArgs Ok()
@@ -125,20 +125,23 @@ public readonly struct StatusArgs
 
 internal class Status(nint ptr, bool isOwner = true) : MpResourceHandle(ptr, isOwner)
 {
+    private bool? _ok;
+    private int? _rawCode;
+
     protected override void DeleteMpPtr()
     {
         UnsafeNativeMethods.absl_Status__delete(Ptr);
     }
 
     /// <summary>
-    ///   The optimized implementation of <see cref="AssertOk" />.
+    ///     The optimized implementation of <see cref="AssertOk" />.
     /// </summary>
     public static void UnsafeAssertOk(nint statusPtr)
     {
-        var ok = SafeNativeMethods.absl_Status__ok(statusPtr);
+        bool ok = SafeNativeMethods.absl_Status__ok(statusPtr);
         if (!ok)
         {
-            using var status = new Status(statusPtr, true);
+            using Status status = new(statusPtr);
             status.AssertOk();
         }
         else
@@ -147,23 +150,14 @@ internal class Status(nint ptr, bool isOwner = true) : MpResourceHandle(ptr, isO
         }
     }
 
-    private bool? _ok;
-    private int? _rawCode;
-
     public void AssertOk()
     {
-        if (!Ok())
-        {
-            throw new BadStatusException(Code(), ToString());
-        }
+        if (!Ok()) throw new BadStatusException(Code(), ToString());
     }
 
     public bool Ok()
     {
-        if (_ok is bool valueOfOk)
-        {
-            return valueOfOk;
-        }
+        if (_ok is bool valueOfOk) return valueOfOk;
         _ok = SafeNativeMethods.absl_Status__ok(MpPtr);
         return (bool)_ok;
     }
@@ -175,10 +169,7 @@ internal class Status(nint ptr, bool isOwner = true) : MpResourceHandle(ptr, isO
 
     public int RawCode()
     {
-        if (_rawCode is int valueOfRawCode)
-        {
-            return valueOfRawCode;
-        }
+        if (_rawCode is int valueOfRawCode) return valueOfRawCode;
         _rawCode = SafeNativeMethods.absl_Status__raw_code(MpPtr);
         return (int)_rawCode;
     }
@@ -190,7 +181,7 @@ internal class Status(nint ptr, bool isOwner = true) : MpResourceHandle(ptr, isO
 
     public static Status Build(StatusCode code, string message, bool isOwner = true)
     {
-        UnsafeNativeMethods.absl_Status__i_PKc((int)code, message, out var ptr).Assert();
+        UnsafeNativeMethods.absl_Status__i_PKc((int)code, message, out IntPtr ptr).Assert();
 
         return new Status(ptr, isOwner);
     }

@@ -33,7 +33,8 @@ internal readonly struct NativeDetection
         {
             unsafe
             {
-                return new ReadOnlySpan<NativeNormalizedKeypoint>((NativeNormalizedKeypoint*)_keypoints, (int)keypointsCount);
+                return new ReadOnlySpan<NativeNormalizedKeypoint>((NativeNormalizedKeypoint*)_keypoints,
+                    (int)keypointsCount);
             }
         }
     }

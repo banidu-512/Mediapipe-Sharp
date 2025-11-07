@@ -14,5 +14,6 @@ internal static partial class UnsafeNativeMethods
     public static extern MpReturnCode mp_GpuResources_Create(out IntPtr status, out IntPtr gpuResources);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_GpuResources_Create__Pv(IntPtr externalContext, out IntPtr status, out IntPtr gpuResources);
+    public static extern MpReturnCode mp_GpuResources_Create__Pv(IntPtr externalContext, out IntPtr status,
+        out IntPtr gpuResources);
 }

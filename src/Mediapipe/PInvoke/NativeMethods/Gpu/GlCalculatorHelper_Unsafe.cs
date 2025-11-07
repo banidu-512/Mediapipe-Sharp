@@ -12,11 +12,13 @@ internal static partial class UnsafeNativeMethods
     public static extern void mp_GlCalculatorHelper__delete(IntPtr glCalculatorHelper);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_GlCalculatorHelper__InitializeForTest__Pgr(IntPtr glCalculatorHelper, IntPtr gpuResources);
+    public static extern MpReturnCode mp_GlCalculatorHelper__InitializeForTest__Pgr(IntPtr glCalculatorHelper,
+        IntPtr gpuResources);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_GlCalculatorHelper__RunInGlContext__PF(
-        IntPtr glCalculatorHelper, [MarshalAs(UnmanagedType.FunctionPtr)] GlCalculatorHelper.NativeGlStatusFunction glFunc, out IntPtr status);
+        IntPtr glCalculatorHelper,
+        [MarshalAs(UnmanagedType.FunctionPtr)] GlCalculatorHelper.NativeGlStatusFunction glFunc, out IntPtr status);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
     public static extern MpReturnCode mp_GlCalculatorHelper__CreateSourceTexture__Rif(
@@ -39,5 +41,6 @@ internal static partial class UnsafeNativeMethods
         IntPtr glCalculatorHelper, IntPtr gpuBuffer, out IntPtr glTexture);
 
     [DllImport(LibName.MediaPipeLibrary, ExactSpelling = true)]
-    public static extern MpReturnCode mp_GlCalculatorHelper__BindFrameBuffer__Rtexture(IntPtr glCalculatorHelper, IntPtr glTexture);
+    public static extern MpReturnCode mp_GlCalculatorHelper__BindFrameBuffer__Rtexture(IntPtr glCalculatorHelper,
+        IntPtr glTexture);
 }

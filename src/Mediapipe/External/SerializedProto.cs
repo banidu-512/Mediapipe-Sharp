@@ -17,13 +17,13 @@ internal readonly struct SerializedProto
 
     public unsafe T Deserialize<T>(MessageParser<T> parser) where T : IMessage<T>
     {
-        var bytes = new ReadOnlySpan<byte>((byte*)_str, _length);
+        ReadOnlySpan<byte> bytes = new((byte*)_str, _length);
         return parser.ParseFrom(bytes);
     }
 
     public unsafe void WriteTo<T>(T proto) where T : IMessage<T>
     {
-        var bytes = new ReadOnlySpan<byte>((byte*)_str, _length);
+        ReadOnlySpan<byte> bytes = new((byte*)_str, _length);
         proto.MergeFrom(bytes);
     }
 }
