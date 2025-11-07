@@ -9,6 +9,149 @@
         "OPENAI_API_KEY": "your_openai_api_key_here",
         "ANTHROPIC_API_KEY": "your_anthropic_api_key_here"
       }
+    },
+    "github.com/github-mcp-server": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}"
+      }
+    },
+    "github.com/qdrant/mcp-server-qdrant": {
+      "command": "uvx",
+      "args": ["mcp-server-qdrant"],
+      "env": {
+        "QDRANT_URL": "${input:qdrant_url}",
+        "QDRANT_API_KEY": "${input:qdrant_api_key}",
+        "COLLECTION_NAME": "${input:qdrant_collection_name}",
+        "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2"
+      }
+    },
+    "github.com/upstash/context7-mcp": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp", "--api-key", "${input:context7_api_key}"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_TOOLSETS",
+        "-e",
+        "GITHUB_READ_ONLY",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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",
+        "GITHUB_TOOLSETS": "",
+        "GITHUB_READ_ONLY": ""
+      },
+      "alwaysAllow": [
+        "get_file_contents"
+      ],
+      "disabledTools": [
+        "add_comment_to_pending_review",
+        "add_issue_comment",
+        "assign_copilot_to_issue"
+      ],
+      "disabled": true
+    },
+    "memory": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "-v",
+        "claude-memory:/app/dist",
+        "--rm",
+        "mcp/memory"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "D:/Users/Artonurban"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": ""
+      }
+    },
+    "tixl Docs": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://gitmcp.io/tixl3d/tixl"
+      ]
+    },
+    "jetbrains": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jetbrains/mcp-proxy"
+      ],
+      "disabled": true,
+      "alwaysAllow": []
+    },
+    "sequentialthinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "disabled": true,
+      "alwaysAllow": []
     }
-  }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_token",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "qdrant_url",
+      "description": "Qdrant URL (e.g., https://xyz-example.eu-central.aws.cloud.qdrant.io:6333 or :memory: for local testing)"
+    },
+    {
+      "type": "promptString",
+      "id": "qdrant_api_key",
+      "description": "Qdrant API Key (optional for local instances)",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "qdrant_collection_name",
+      "description": "Qdrant Collection Name"
+    },
+    {
+      "type": "promptString",
+      "id": "context7_api_key",
+      "description": "Context7 API Key (optional - get one at https://context7.com/dashboard)",
+      "password": true
+    }
+  ]
 }
