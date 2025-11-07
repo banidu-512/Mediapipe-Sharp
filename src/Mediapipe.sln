@@ -22,6 +22,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoseLandmarksApp", "PoseLan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectDetectionApp", "ObjectDetectionApp\ObjectDetectionApp.csproj", "{766DC1BD-4B22-43C6-A643-D087DFCCCE56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSegmentationApp", "ImageSegmentationApp\ImageSegmentationApp.csproj", "{844DD098-A024-40F8-93BE-B0DBD3B69288}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestureRecognitionApp", "GestureRecognitionApp\GestureRecognitionApp.csproj", "{64CB3EE7-51C8-4BC4-872D-8C495A8AD4B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +60,14 @@ Global
 		{766DC1BD-4B22-43C6-A643-D087DFCCCE56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{766DC1BD-4B22-43C6-A643-D087DFCCCE56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{766DC1BD-4B22-43C6-A643-D087DFCCCE56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{844DD098-A024-40F8-93BE-B0DBD3B69288}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{844DD098-A024-40F8-93BE-B0DBD3B69288}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{844DD098-A024-40F8-93BE-B0DBD3B69288}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{844DD098-A024-40F8-93BE-B0DBD3B69288}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64CB3EE7-51C8-4BC4-872D-8C495A8AD4B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64CB3EE7-51C8-4BC4-872D-8C495A8AD4B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64CB3EE7-51C8-4BC4-872D-8C495A8AD4B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64CB3EE7-51C8-4BC4-872D-8C495A8AD4B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
