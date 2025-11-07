@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceMeshApp", "FaceMeshApp\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandMeshApp", "HandMeshApp\HandMeshApp.csproj", "{1FF7388D-08A5-4A0E-B72C-70DAB2643631}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDetectionApp", "FaceDetectionApp\FaceDetectionApp.csproj", "{534A3BD9-8F86-4481-9E15-300D6EA95695}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{1FF7388D-08A5-4A0E-B72C-70DAB2643631}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FF7388D-08A5-4A0E-B72C-70DAB2643631}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FF7388D-08A5-4A0E-B72C-70DAB2643631}.Release|Any CPU.Build.0 = Release|Any CPU
+		{534A3BD9-8F86-4481-9E15-300D6EA95695}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{534A3BD9-8F86-4481-9E15-300D6EA95695}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{534A3BD9-8F86-4481-9E15-300D6EA95695}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{534A3BD9-8F86-4481-9E15-300D6EA95695}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
